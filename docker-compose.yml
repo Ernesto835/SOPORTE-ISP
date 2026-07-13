@@ -1,110 +1,106 @@
+# ==============================================================================
+# CONFIGURACIÓN DEL CLÚSTER COCKROACHDB (3 NODOS) - ACC SOPORTE ISP
+# ==============================================================================
 version: '3.8'
 
 networks:
   roach-net:
     driver: bridge
 
-volumes:
-  crdb-data-1:
-  crdb-data-2:
-  crdb-data-3:
-  crdb-data-single:
-
 services:
+  # ----------------------------------------------------------------------------
+  # NODO 1: Administrador principal del clúster
+  # ----------------------------------------------------------------------------
   crdb-node1:
-    image: cockroachdb/cockroach:latest
+    image: cockroachdb/cockroach:v23.1.20
     container_name: crdb-node1
     hostname: crdb-node1
     networks:
       - roach-net
     ports:
-      - "26257:26257"
-      - "8080:8080"
+      - "26257:26257" # Puerto SQL externo
+      - "8080:8080"   # Consola de administración (Web UI)
     volumes:
-      - crdb-data-1:/cockroach/cockroach-data
-    environment:
-      COCKROACH_DATABASE: defaultdb
-    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --listen-addr=0.0.0.0:26257 --sql-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080
+      - node1-data:/cockroach/cockroach-data
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --advertise-addr=crdb-node1
     mem_limit: 512m
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
+      retries: 3
 
+  # ----------------------------------------------------------------------------
+  # NODO 2: Nodo de redundancia y distribución de datos
+  # ----------------------------------------------------------------------------
   crdb-node2:
-    image: cockroachdb/cockroach:latest
+    image: cockroachdb/cockroach:v23.1.20
     container_name: crdb-node2
     hostname: crdb-node2
     networks:
       - roach-net
     ports:
-      - "26258:26257"
-      - "8081:8080"
+      - "26258:26257" # Mapeo SQL para acceso externo individual
+      - "8081:8080"   # Consola alternativa
     volumes:
-      - crdb-data-2:/cockroach/cockroach-data
-    environment:
-      COCKROACH_DATABASE: defaultdb
-    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --listen-addr=0.0.0.0:26257 --sql-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080
+      - node2-data:/cockroach/cockroach-data
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --advertise-addr=crdb-node2
     mem_limit: 512m
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
-    depends_on:
-      crdb-node1:
-        condition: service_healthy
-    restart: unless-stopped
+      retries: 3
 
+  # ----------------------------------------------------------------------------
+  # NODO 3: Nodo de redundancia y distribución de datos
+  # ----------------------------------------------------------------------------
   crdb-node3:
-    image: cockroachdb/cockroach:latest
+    image: cockroachdb/cockroach:v23.1.20
     container_name: crdb-node3
     hostname: crdb-node3
     networks:
       - roach-net
     ports:
-      - "26259:26257"
-      - "8082:8080"
+      - "26259:26257" # Mapeo SQL para acceso externo individual
+      - "8082:8080"   # Consola alternativa
     volumes:
-      - crdb-data-3:/cockroach/cockroach-data
-    environment:
-      COCKROACH_DATABASE: defaultdb
-    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --listen-addr=0.0.0.0:26257 --sql-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080
+      - node3-data:/cockroach/cockroach-data
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --advertise-addr=crdb-node3
     mem_limit: 512m
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
-    depends_on:
-      crdb-node1:
-        condition: service_healthy
-    restart: unless-stopped
+      retries: 3
 
+  # ----------------------------------------------------------------------------
+  # NODO ÚNICO: Instancia standalone para comparativa de rendimiento (benchmark)
+  # ----------------------------------------------------------------------------
   cockroach-single:
-    image: cockroachdb/cockroach:latest
+    image: cockroachdb/cockroach:v23.1.20
     container_name: cockroach-single
     hostname: cockroach-single
     networks:
       - roach-net
     ports:
-      - "26260:26257"
-      - "8083:8080"
+      - "26260:26257" # Puerto SQL para benchmark comparativo
+      - "8083:8080"   # Consola Web UI del nodo único
     volumes:
-      - crdb-data-single:/cockroach/cockroach-data
-    environment:
-      COCKROACH_DATABASE: defaultdb
-    command: start-single-node --insecure --listen-addr=0.0.0.0:26257 --sql-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080
+      - single-data:/cockroach/cockroach-data
+    command: start-single-node --insecure --advertise-addr=cockroach-single
     mem_limit: 512m
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
+      retries: 3
+
+# ------------------------------------------------------------------------------
+# VOLÚMENES PERSISTENTES
+# ------------------------------------------------------------------------------
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
+  single-data:
