@@ -1,0 +1,110 @@
+version: '3.8'
+
+networks:
+  roach-net:
+    driver: bridge
+
+volumes:
+  crdb-data-1:
+  crdb-data-2:
+  crdb-data-3:
+  crdb-data-single:
+
+services:
+  crdb-node1:
+    image: cockroachdb/cockroach:latest
+    container_name: crdb-node1
+    hostname: crdb-node1
+    networks:
+      - roach-net
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - crdb-data-1:/cockroach/cockroach-data
+    environment:
+      COCKROACH_DATABASE: defaultdb
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --listen-addr=0.0.0.0:26257 --sql-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  crdb-node2:
+    image: cockroachdb/cockroach:latest
+    container_name: crdb-node2
+    hostname: crdb-node2
+    networks:
+      - roach-net
+    ports:
+      - "26258:26257"
+      - "8081:8080"
+    volumes:
+      - crdb-data-2:/cockroach/cockroach-data
+    environment:
+      COCKROACH_DATABASE: defaultdb
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --listen-addr=0.0.0.0:26257 --sql-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      crdb-node1:
+        condition: service_healthy
+    restart: unless-stopped
+
+  crdb-node3:
+    image: cockroachdb/cockroach:latest
+    container_name: crdb-node3
+    hostname: crdb-node3
+    networks:
+      - roach-net
+    ports:
+      - "26259:26257"
+      - "8082:8080"
+    volumes:
+      - crdb-data-3:/cockroach/cockroach-data
+    environment:
+      COCKROACH_DATABASE: defaultdb
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --listen-addr=0.0.0.0:26257 --sql-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    depends_on:
+      crdb-node1:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cockroach-single:
+    image: cockroachdb/cockroach:latest
+    container_name: cockroach-single
+    hostname: cockroach-single
+    networks:
+      - roach-net
+    ports:
+      - "26260:26257"
+      - "8083:8080"
+    volumes:
+      - crdb-data-single:/cockroach/cockroach-data
+    environment:
+      COCKROACH_DATABASE: defaultdb
+    command: start-single-node --insecure --listen-addr=0.0.0.0:26257 --sql-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
