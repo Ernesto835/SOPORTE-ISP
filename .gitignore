@@ -1,9 +1,82 @@
+# ==============================================================================
+# GITIGNORE — PROYECTO ISP SOPORTE (CockroachDB + Python)
+# ==============================================================================
+
+# ----------------------------
+# Python
+# ----------------------------
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Entornos virtuales
+.venv/
+venv/
+ENV/
+env/
+
+# ----------------------------
+# Sistema operativo
+# ----------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.lnk
+
+# ----------------------------
+# IDEs y editores
+# ----------------------------
 .idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ----------------------------
+# Variables de entorno
+# ----------------------------
 .env
-evidencia/*.mp4
-evidencia/*.png
+.env.local
+.env.*.local
+
+# ----------------------------
+# LaTeX (archivos temporales de compilacion)
+# ----------------------------
 informe/*.aux
 informe/*.log
-informe/*.pdf
+informe/*.out
+informe/*.toc
+informe/*.synctex.gz
+informe/*.fls
+informe/*.fdb_latexmk
+informe/*.nav
+informe/*.snm
+informe/*.vrb
+informe/*.bbl
+informe/*.blg
+informe/*.idx
+informe/*.ilg
+informe/*.ind
+informe/*.lof
+informe/*.lot
+
+# ----------------------------
+# Evidencia multimedia (archivos grandes)
+# ----------------------------
+evidencia/*.mp4
+evidencia/*.avi
+evidencia/*.mov
+evidencia/*.png
+evidencia/*.jpg
+evidencia/*.jpeg
+
+# ----------------------------
+# Dockery volumenes locales (si se copian fuera de Docker)
+# ----------------------------
+cockroach-data/
