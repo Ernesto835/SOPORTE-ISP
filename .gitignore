@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.idea/
+.env
+evidencia/*.mp4
+evidencia/*.png
+informe/*.aux
+informe/*.log
+informe/*.pdf
