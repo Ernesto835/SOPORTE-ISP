@@ -1,53 +1,44 @@
--- ==============================================================================
--- ESQUEMA DE BASE DE DATOS ISP SOPORTE
--- ==============================================================================
-
 CREATE DATABASE IF NOT EXISTS isp_soporte;
-
 USE isp_soporte;
 
--- Tabla: clientes
 CREATE TABLE IF NOT EXISTS clientes (
-  cliente_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  nombre VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL UNIQUE,
-  telefono VARCHAR(20),
-  estado VARCHAR(50) NOT NULL CHECK (estado IN ('activo', 'inactivo', 'bloqueado')),
-  fecha_creacion TIMESTAMP DEFAULT now(),
-  fecha_actualizacion TIMESTAMP DEFAULT now()
+    cliente_id UUID DEFAULT gen_random_uuid(),
+    nombre STRING(100) NOT NULL,
+    correo STRING(100) NOT NULL UNIQUE,
+    telefono STRING(20),
+    plan_contratado STRING(50) NOT NULL,
+    estado STRING(20) DEFAULT 'activo',
+    creado_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT pk_clientes PRIMARY KEY (cliente_id),
+    CONSTRAINT chk_estado_cliente CHECK (estado IN ('activo', 'suspendido', 'retirado'))
 );
 
--- Tabla: tickets
 CREATE TABLE IF NOT EXISTS tickets (
-  region VARCHAR(50) NOT NULL,
-  ticket_id UUID NOT NULL,
-  cliente_id UUID NOT NULL,
-  titulo VARCHAR(255) NOT NULL,
-  descripcion TEXT,
-  prioridad VARCHAR(20) NOT NULL CHECK (prioridad IN ('baja', 'media', 'alta', 'critica')),
-  estado VARCHAR(50) NOT NULL CHECK (estado IN ('abierto', 'en_proceso', 'resuelto', 'cerrado')),
-  fecha_creacion TIMESTAMP DEFAULT now(),
-  fecha_actualizacion TIMESTAMP DEFAULT now(),
-  PRIMARY KEY (region, ticket_id),
-  FOREIGN KEY (cliente_id) REFERENCES clientes(cliente_id) ON DELETE CASCADE,
-  CHECK (region IN ('norte', 'centro', 'sur', 'este', 'oeste'))
+    ticket_id UUID DEFAULT gen_random_uuid(),
+    region STRING(20) NOT NULL,
+    cliente_id UUID NOT NULL,
+    asunto STRING(150) NOT NULL,
+    descripcion TEXT,
+    prioridad STRING(20) NOT NULL DEFAULT 'media',
+    estado STRING(20) NOT NULL DEFAULT 'abierto',
+    creado_at TIMESTAMP DEFAULT now(),
+    cerrado_at TIMESTAMP,
+    CONSTRAINT pk_tickets PRIMARY KEY (region, ticket_id),
+    CONSTRAINT fk_tickets_clientes FOREIGN KEY (cliente_id) REFERENCES clientes(cliente_id) ON DELETE CASCADE,
+    CONSTRAINT chk_region CHECK (region IN ('Norte', 'Centro', 'Sur')),
+    CONSTRAINT chk_prioridad CHECK (prioridad IN ('baja', 'media', 'alta', 'critica')),
+    CONSTRAINT chk_estado_ticket CHECK (estado IN ('abierto', 'en_proceso', 'resuelto', 'cerrado'))
 );
 
--- Tabla: historial_estados
 CREATE TABLE IF NOT EXISTS historial_estados (
-  region VARCHAR(50) NOT NULL,
-  historial_id UUID NOT NULL,
-  ticket_id UUID NOT NULL,
-  estado_anterior VARCHAR(50),
-  estado_nuevo VARCHAR(50) NOT NULL,
-  comentario TEXT,
-  fecha_cambio TIMESTAMP DEFAULT now(),
-  PRIMARY KEY (region, historial_id),
-  FOREIGN KEY (region, ticket_id) REFERENCES tickets(region, ticket_id) ON DELETE CASCADE
+    historial_id UUID DEFAULT gen_random_uuid(),
+    region STRING(20) NOT NULL,
+    ticket_id UUID NOT NULL,
+    estado_anterior STRING(20),
+    estado_nuevo STRING(20) NOT NULL,
+    comentario TEXT,
+    tecnico_asignado STRING(100),
+    actualizado_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT pk_historial PRIMARY KEY (region, historial_id),
+    CONSTRAINT fk_historial_tickets FOREIGN KEY (region, ticket_id) REFERENCES tickets(region, ticket_id) ON DELETE CASCADE
 );
-
--- Índices para optimización
-CREATE INDEX idx_tickets_cliente ON tickets(cliente_id);
-CREATE INDEX idx_tickets_estado ON tickets(estado);
-CREATE INDEX idx_tickets_prioridad ON tickets(prioridad);
-CREATE INDEX idx_historial_ticket ON historial_estados(ticket_id);
