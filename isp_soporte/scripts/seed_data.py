@@ -251,9 +251,10 @@ def crear_esquema(uri):
             );
         """)
 
-        # Las particiones requieren licencia CockroachDB Enterprise (CCL).
-        # Se aplican en un try/except separado: si fallan, las tablas siguen
-        # siendo válidas y los datos se pueden insertar igualmente.
+        print("[+] Tablas creadas exitosamente (clientes, tickets, historial_estados).")
+
+        # Aplicar particionamiento horizontal por region.
+        # Requiere licencia Enterprise Free activada en el cluster.
         try:
             cursor.execute("""
                 ALTER TABLE tickets PARTITION BY LIST (region) (
@@ -269,10 +270,11 @@ def crear_esquema(uri):
                     PARTITION p_sur VALUES IN ('Sur')
                 );
             """)
-            print("[+] Esquema creado exitosamente (3 tablas + particiones).")
+            print("[+] Particionamiento aplicado exitosamente (licencia Enterprise activa).")
         except Exception as e:
-            print(f"[!] Particionamiento no aplicado (requiere licencia Enterprise): {e}")
-            print("[+] Esquema creado exitosamente (3 tablas, sin particiones CCL).")
+            print(f"[-] ERROR: No se pudo aplicar la particion. Verifique la licencia Enterprise.")
+            print(f"[-] Detalle: {e}")
+            raise
 
         return True
     except Exception as e:

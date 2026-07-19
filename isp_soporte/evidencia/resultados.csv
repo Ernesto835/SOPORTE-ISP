@@ -1,6 +1,6 @@
 consulta,tiempo_cluster_ms,tiempo_nodo_unico_ms,factor_desempeno
-Consulta 1,33.41,4.5,7.42x
-Consulta 2,17.65,4.67,3.78x
-Consulta 3,3.89,4.33,0.9x
-Consulta 4,15.3,3.98,3.84x
-Consulta 5,24.61,4.48,5.49x
+Consulta 1,26.84,34.84,0.77x
+Consulta 2,10.28,8.94,1.15x
+Consulta 3,3.31,4.7,0.7x
+Consulta 4,11.14,10.27,1.08x
+Consulta 5,22.74,19.73,1.15x
