@@ -17,7 +17,7 @@ a fallos.
 - Docker Desktop >= 24.0
 - Docker Compose >= 2.20
 - Python >= 3.10
-- CockroachDB v23.1.20 (se descarga automaticamente con Docker)
+- CockroachDB v24.3.0 (se descarga automaticamente con Docker)
 
 ## Tiempo estimado: 10-15 minutos
 
@@ -36,30 +36,37 @@ docker compose up -d
 docker exec -it crdb-node1 ./cockroach init --insecure
 ```
 
-## Paso 2: Verificar cluster (debe mostrar 3 nodos activos)
+## Paso 2: Activar licencia Enterprise Free
+
+```bash
+docker exec -it crdb-node1 ./cockroach sql --execute="SET CLUSTER SETTING cluster.organization = 'Equipo ISP';"
+docker exec -it crdb-node1 ./cockroach sql --execute="SET CLUSTER SETTING enterprise.license = 'crl-0-EKuj0uEGGAMyEP/IONKyMUOxgAyGUZISsxA6EGPJVwYYVk3kkPih3Sf55kk';"
+```
+
+## Paso 3: Verificar cluster (debe mostrar 3 nodos activos)
 
 ```bash
 python scripts/verify_cluster.py
 ```
 
-## Paso 3: Capturar dashboard del cluster
+## Paso 4: Capturar dashboard del cluster
 
 Abrir http://localhost:8080 en el navegador.
 Tomar captura y guardar como `evidencia/dashboard.png`.
 
-## Paso 4: Generar datos (12,500 registros)
+## Paso 5: Generar datos (12,500 registros)
 
 ```bash
 python scripts/seed_data.py
 ```
 
-## Paso 5: Benchmark comparativo
+## Paso 6: Benchmark comparativo
 
 ```bash
 python scripts/run_benchmark.py
 ```
 
-## Paso 6: Prueba de tolerancia a fallos
+## Paso 7: Prueba de tolerancia a fallos
 
 ```bash
 python scripts/fault_tolerance.py

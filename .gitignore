@@ -67,16 +67,18 @@ informe/*.lof
 informe/*.lot
 
 # ----------------------------
-# Evidencia multimedia (archivos grandes)
+# Videos grandes (no subir a Git)
 # ----------------------------
 evidencia/*.mp4
 evidencia/*.avi
 evidencia/*.mov
-evidencia/*.png
-evidencia/*.jpg
-evidencia/*.jpeg
 
 # ----------------------------
 # Dockery volumenes locales (si se copian fuera de Docker)
 # ----------------------------
 cockroach-data/
+
+# ----------------------------
+# Archivos de planificacion (no son codigo del proyecto)
+# ----------------------------
+plan_commits*.txt

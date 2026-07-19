@@ -12,7 +12,7 @@ services:
   # NODO 1: Administrador principal del clúster
   # ----------------------------------------------------------------------------
   crdb-node1:
-    image: cockroachdb/cockroach:v23.1.20
+    image: cockroachdb/cockroach:v24.3.0
     container_name: crdb-node1
     hostname: crdb-node1
     networks:
@@ -34,7 +34,7 @@ services:
   # NODO 2: Nodo de redundancia y distribución de datos
   # ----------------------------------------------------------------------------
   crdb-node2:
-    image: cockroachdb/cockroach:v23.1.20
+    image: cockroachdb/cockroach:v24.3.0
     container_name: crdb-node2
     hostname: crdb-node2
     networks:
@@ -56,7 +56,7 @@ services:
   # NODO 3: Nodo de redundancia y distribución de datos
   # ----------------------------------------------------------------------------
   crdb-node3:
-    image: cockroachdb/cockroach:v23.1.20
+    image: cockroachdb/cockroach:v24.3.0
     container_name: crdb-node3
     hostname: crdb-node3
     networks:
@@ -78,7 +78,7 @@ services:
   # NODO ÚNICO: Instancia standalone para comparativa de rendimiento (benchmark)
   # ----------------------------------------------------------------------------
   cockroach-single:
-    image: cockroachdb/cockroach:v23.1.20
+    image: cockroachdb/cockroach:v24.3.0
     container_name: cockroach-single
     hostname: cockroach-single
     networks:
