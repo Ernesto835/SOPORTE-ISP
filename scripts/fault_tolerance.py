@@ -10,7 +10,7 @@ import sys
 
 CLUSTER_URI = "postgresql://root@localhost:26257/isp_soporte?sslmode=disable"
 NODO_A_DETENER = "crdb-node2"
-ESPERA_REINICIO = 15  # Segundos para esperar tras reiniciar un nodo
+TIMEOUT_REINICIO = 60  # Máximo tiempo de espera para que el nodo vuelva a is_live=true
 
 
 def ejecutar_sql(uri, query, fetch=True):
@@ -80,18 +80,30 @@ def probar_escritura():
 
 
 def probar_lectura():
-    """Intenta leer datos para verificar que el clúster responde consultas"""
-    print("[+] Probando lectura en el clúster...")
-    resultado = ejecutar_sql(CLUSTER_URI, """
-        SELECT COUNT(*) FROM clientes;
-    """)
-    if resultado:
-        total = resultado[0][0]
-        print(f"[+] Lectura exitosa. Total clientes: {total}")
+    """Ejecuta SELECT COUNT(*) en la tabla principal (tickets) y mide el tiempo de respuesta"""
+    print("[+] Probando lectura en el clúster (SELECT COUNT(*) FROM tickets)...")
+    conn = None
+    cursor = None
+    try:
+        conn = psycopg2.connect(CLUSTER_URI)
+        conn.autocommit = True
+        cursor = conn.cursor()
+
+        start = time.perf_counter()
+        cursor.execute("SELECT COUNT(*) FROM tickets;")
+        total = cursor.fetchone()[0]
+        elapsed = round((time.perf_counter() - start) * 1000, 2)
+
+        print(f"[+] Lectura exitosa. Total tickets: {total} ({elapsed} ms)")
         return True
-    else:
-        print("[-] Fallo en la lectura.")
+    except Exception as e:
+        print(f"[-] Fallo en la lectura: {e}")
         return False
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 def detener_nodo(nombre_nodo):
@@ -117,40 +129,60 @@ def detener_nodo(nombre_nodo):
 
 
 def reiniciar_nodo(nombre_nodo):
-    """Reinicia un contenedor Docker del clúster"""
+    """Reinicia un contenedor y espera hasta que is_live=true (polling con timeout)"""
     print(f"\n[+] REINICIANDO nodo '{nombre_nodo}'...")
     try:
         resultado = subprocess.run(
             ["docker", "start", nombre_nodo],
             capture_output=True, text=True, timeout=30
         )
-        if resultado.returncode == 0:
-            print(f"[+] Nodo '{nombre_nodo}' reiniciado. Esperando {ESPERA_REINICIO}s para sincronización...")
-            time.sleep(ESPERA_REINICIO)
-            return True
-        else:
+        if resultado.returncode != 0:
             print(f"[-] Error al reiniciar nodo: {resultado.stderr.strip()}")
             return False
+
+        print(f"[+] Nodo '{nombre_nodo}' iniciado. Esperando is_live=true...")
+
+        start = time.perf_counter()
+        while True:
+            elapsed = round(time.perf_counter() - start, 1)
+            if elapsed > TIMEOUT_REINICIO:
+                print(f"[-] Timeout: el nodo no alcanzó is_live=true en {TIMEOUT_REINICIO}s.")
+                return False
+
+            nodos = ejecutar_sql(CLUSTER_URI, """
+                SELECT is_live FROM crdb_internal.gossip_nodes
+                WHERE address LIKE '%crdb-node2%';
+            """)
+            if nodos and nodos[0][0]:
+                tiempo_real = round(time.perf_counter() - start, 1)
+                print(f"[+] Nodo reincorporado. is_live=true alcanzado en {tiempo_real}s.")
+                return True
+
+            print(f"  ...esperando ({elapsed}s/{TIMEOUT_REINICIO}s)")
+            time.sleep(2)
+
     except FileNotFoundError:
         print("[-] Docker no encontrado.")
         return False
     except subprocess.TimeoutExpired:
-        print("[-] Timeout al reiniciar el nodo.")
+        print("[-] Timeout al ejecutar docker start.")
         return False
 
 
 def mostrar_ranges(tabla):
-    """Ejecuta SHOW RANGES y muestra la distribución de rangos en los nodos"""
+    """Ejecuta SHOW RANGES y muestra la distribucion de rangos en los nodos"""
     print(f"\n[+] SHOW RANGES FROM TABLE {tabla}:")
     resultado = ejecutar_sql(CLUSTER_URI, f"SHOW RANGES FROM TABLE {tabla};")
     if resultado:
-        print(f"  {'Range ID':<12}{'Lease Holder':<16}{'Replicas'}")
-        print(f"  {'-'*50}")
+        print(f"  {'Range ID':<12}{'Start Key':<20}{'End Key':<20}{'Lease Holder':<16}{'Replicas'}")
+        print(f"  {'-'*80}")
         for fila in resultado:
-            range_id = fila[0] if len(fila) > 0 else "?"
-            lease_holder = fila[1] if len(fila) > 1 else "?"
-            replicas = str(fila[2]) if len(fila) > 2 else "?"
-            print(f"  {str(range_id):<12}{str(lease_holder):<16}{replicas}")
+            start_key = str(fila[0]) if len(fila) > 0 else "?"
+            end_key = str(fila[1]) if len(fila) > 1 else "?"
+            range_id = str(fila[3]) if len(fila) > 3 else "?"
+            lease_holder = str(fila[5]) if len(fila) > 5 else "?"
+            replicas = str(fila[6]) if len(fila) > 6 else "?"
+            print(f"  {range_id:<12}{start_key:<20}{end_key:<20}{lease_holder:<16}{replicas}")
     else:
         print("  [!] No se pudieron obtener los rangos (puede requerir licencia Enterprise).")
 
@@ -188,7 +220,7 @@ def ejecutar_prueba_tolerance():
         print("[-] No se pudo detener el nodo. Abortando prueba.")
         sys.exit(1)
 
-    time.sleep(5)  # Dar tiempo para que el clúster detecte el nodo caído
+    time.sleep(30)  # Esperar 30s para que el clúster redistribuya rangos tras el fallo
 
     # FASE 4: Verificar quórum con nodo caído (2/3 = quórum mínimo)
     print("\n--- FASE 4: Verificar quórum con nodo caído ---")
