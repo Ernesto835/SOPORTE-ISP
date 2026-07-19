@@ -1,0 +1,691 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish, es-nodecimaldot, es-tabla]{babel}
+\usepackage[top=2.25cm, bottom=2cm, left=3cm, right=2.5cm]{geometry}
+\usepackage[style=ieee, backend=biber, sorting=none, doi=true]{biblatex}
+\usepackage{setspace}
+\onehalfspacing
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{2pt}
+\usepackage{titlesec}
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+\titleformat{\subsubsection}{\normalsize\itshape}{\thesubsubsection.}{0.5em}{}
+\titlespacing{\section}{0pt}{14pt}{6pt}
+\titlespacing{\subsection}{0pt}{10pt}{4pt}
+\titlespacing{\subsubsection}{0pt}{8pt}{3pt}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf, skip=6pt}
+\usepackage[hidelinks, breaklinks=true]{hyperref}
+\usepackage{url}
+\urlstyle{tt}
+\usepackage{fancyhdr}
+\fancyhf{}
+\fancyhead[L]{Aplicaciones Distribuidas \textperiodcentered{} UTEQ}
+\fancyhead[R]{\small GA-SUM-03 / PE-U3 -- Equipo ACC}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{14pt}
+\usepackage[framemethod=default]{mdframed}
+\usepackage{xcolor}
+\definecolor{azulUTEQ}{RGB}{13, 42, 93}
+\definecolor{grisClaro}{RGB}{245, 245, 245}
+\definecolor{azulClaro}{RGB}{232, 240, 254}
+\usepackage{enumitem}
+\setlist[itemize]{noitemsep, topsep=3pt, leftmargin=1.4em}
+\setlist[enumerate]{noitemsep, topsep=3pt, leftmargin=1.6em}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{ragged2e}
+
+% ============================================================
+% Configuración de bloques de código (lstlisting)
+% ============================================================
+\usepackage{xcolor}
+\lstdefinestyle{yamlstyle}{
+    language=,
+    basicstyle=\ttfamily\footnotesize,
+    commentstyle=\color{gray},
+    keywordstyle=\color{azulUTEQ}\bfseries,
+    numbers=none,
+    frame=single,
+    breaklines=true,
+    backgroundcolor=\color{grisClaro},
+    tabsize=2,
+    showstringspaces=false
+}
+\lstdefinestyle{sqlstyle}{
+    language=SQL,
+    basicstyle=\ttfamily\footnotesize,
+    commentstyle=\color{gray},
+    keywordstyle=\color{azulUTEQ}\bfseries,
+    numbers=none,
+    frame=single,
+    breaklines=true,
+    backgroundcolor=\color{grisClaro},
+    tabsize=2,
+    showstringspaces=false
+}
+\addbibresource{references.bib}
+
+\begin{document}
+
+% ============================================================
+% PORTADA
+% ============================================================
+\begin{titlepage}
+\centering
+\vspace*{0.2cm}
+{\large\bfseries Universidad Técnica Estatal de Quevedo}\\[4pt]
+{\normalsize Facultad de Ciencias de la Computación}\\[2pt]
+{\normalsize Carrera de Ingeniería de Software}
+\vspace{0.5cm}
+\rule{\linewidth}{1pt}\\[6pt]
+{\Large\bfseries
+  Implementación y Verificación de un Clúster de Base de Datos\\[2pt]
+  Distribuida con CockroachDB Aplicado al Sistema de\\[2pt]
+  Gestión de Soporte Técnico ISP (Equipo ACC)
+}
+\vspace{2pt}
+\rule{\linewidth}{1pt}
+\vspace{0.5cm}
+{\small
+  \textbf{Código de actividad:} GA-SUM-03 / PE-U3\\[2pt]
+  \textbf{Asignatura:} Aplicaciones Distribuidas (ISR-701)\\[2pt]
+  \textbf{Unidad:} 3 -- Bases de Datos Distribuidas\\[2pt]
+  \textbf{Tipo de guía:} Práctica Experimental\\[2pt]
+  \textbf{Modalidad:} Grupal (Sumativa)\\[2pt]
+  \textbf{Período académico:} 2026--2027 PPA\\[2pt]
+  \textbf{Docente:} Gleiston Cicerón Guerrero Ulloa, M.Sc.\\[2pt]
+  \textbf{PFC de referencia:} ACC -- Soporte Técnico ISP\\[2pt]
+  \textbf{Sistema:} Gestión de Tickets de Soporte Técnico
+}
+\vspace{0.4cm}
+{\small
+\begin{tabular}{@{}ll@{}}
+\textbf{Integrante A} & Ernesto Gregory Luna Mora \\[2pt]
+\textbf{Integrante B} & Cristhian Daniel Pacheco Cárdenas \\[2pt]
+\textbf{Integrante C} & Robinson Rodrigo Cando Moreno \\
+\end{tabular}
+}
+\vspace{0.4cm}
+\begin{minipage}{0.85\linewidth}
+\centering
+\small
+\textbf{Justificación de la elección del PFC (máx. 100 palabras):}\\[3pt]
+\justifying\footnotesize
+El dominio ACC -- Soporte Técnico ISP gestiona tickets de atención distribuidos naturalmente en tres zonas geográficas operativas (Norte, Centro, Sur), lo que ofrece una clave de fragmentación horizontal clara y con sentido de negocio real, a diferencia de un particionamiento artificial. Esta segmentación regional permite ejercitar directamente los conceptos de fragmentación horizontal por lista y de localidad de datos estudiados en la unidad. Asimismo, al tratarse de un servicio de atención al cliente que no puede interrumpirse, el dominio justifica plenamente la necesidad de replicación y tolerancia a fallos en un clúster de tres nodos, evidenciando de forma concreta las garantías de disponibilidad que ofrece el algoritmo de consenso Raft.
+\end{minipage}
+\vspace{0.4cm}
+{\small
+  \textbf{Repositorio del proyecto:} \url{https://github.com/Ernesto835/SOPORTE-ISP.git}
+}
+\vfill
+{\small Quevedo, Ecuador \textperiodcentered{} 19 de julio de 2026}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ============================================================
+% RESUMEN
+% ============================================================
+\section*{Resumen}
+\addcontentsline{toc}{section}{Resumen}
+
+El presente informe documenta la implementación, configuración y verificación de un clúster de base de datos distribuida CockroachDB de tres nodos, aplicado al esquema de datos del dominio ACC -- Soporte Técnico ISP, en el marco de la Práctica Experimental GA-SUM-03/PE-U3 de la asignatura Aplicaciones Distribuidas. Se implementó una estrategia de fragmentación horizontal por región geográfica sobre la tabla principal de tickets, verificada tanto a nivel lógico como físico mediante los comandos nativos de CockroachDB. Se realizó una prueba experimental de tolerancia a fallos, deteniendo un nodo del clúster y verificando que el sistema mantuvo el servicio de lectura y escritura gracias al quórum del algoritmo de consenso Raft, reincorporando posteriormente el nodo en un tiempo de 2.0 segundos. Adicionalmente, se ejecutó una comparación cuantitativa de rendimiento entre el clúster distribuido y una instancia de nodo único sobre cinco consultas representativas del dominio, evidenciando un patrón mixto de resultados según la naturaleza de coordinación requerida por cada consulta. El proyecto integra fundamento teórico verificado bibliográficamente, evidencia experimental reproducible y análisis crítico de los resultados obtenidos, cumpliendo los objetivos de aprendizaje de la Unidad 3 de la asignatura.
+
+% ============================================================
+% INTRODUCCIÓN
+% ============================================================
+\section*{Introducción}
+\addcontentsline{toc}{section}{Introducción}
+
+Las bases de datos distribuidas constituyen un componente central de la infraestructura de sistemas modernos que requieren alta disponibilidad, escalabilidad horizontal y tolerancia a fallos. Sistemas como CockroachDB implementan estas propiedades mediante técnicas de fragmentación, replicación y algoritmos de consenso distribuido, cuya comprensión teórica y verificación práctica constituyen el objetivo central de la Unidad 3 de la asignatura Aplicaciones Distribuidas.
+
+El presente trabajo tiene como objetivo general implementar, configurar y verificar un clúster funcional de base de datos distribuida de tres nodos aplicado al esquema de datos del Proyecto Fin de Curso (PFC) de referencia, demostrando transparencia de fragmentación y replicación, comportamiento ante fallos de nodos y recuperación automática mediante consenso Raft. Como objetivos específicos, se busca: (1) configurar un clúster CockroachDB de tres nodos en contenedores Docker con replicación automática; (2) implementar el esquema de datos del PFC con la estrategia de fragmentación diseñada previamente; (3) demostrar experimentalmente la tolerancia a fallos; (4) medir y comparar cuantitativamente el rendimiento distribuido frente a un nodo único; y (5) redactar un documento académico que integre fundamento teórico, evidencia experimental y análisis crítico.
+
+El equipo seleccionó como dominio de referencia el PFC ACC -- Soporte Técnico ISP, un sistema de gestión de tickets de soporte técnico para un proveedor de servicios de internet, cuyo modelo de datos --compuesto por clientes, tickets y un historial de auditoría de estados-- permite ejercitar de forma representativa los conceptos de fragmentación horizontal por región geográfica y las garantías de consistencia transaccional que ofrece un sistema distribuido serializable.
+
+El documento se estructura de la siguiente manera: la Sección~\ref{fundamento-teorico} desarrolla el fundamento teórico correspondiente a los cuatro subtemas de la Unidad 3; la Sección~\ref{procedimiento} describe el procedimiento experimental aplicado; las Secciones~\ref{resultados} y~\ref{analisis-critico} presentan y analizan los resultados obtenidos; la Sección~\ref{preguntas-analisis} responde las preguntas de análisis obligatorias; y finalmente las Secciones~\ref{conclusiones} y~\ref{declaracion-ia} presentan las conclusiones del equipo y la declaración de uso de herramientas de inteligencia artificial generativa.
+
+% ============================================================
+% SECCIÓN 5: FUNDAMENTO TEÓRICO
+% ============================================================
+\section{Fundamento Teórico}
+\label{fundamento-teorico}
+
+\subsection{Fundamentos y Arquitecturas de Bases de Datos Distribuidas}
+
+Una base de datos distribuida (BDD) se define como una colección de múltiples bases de datos lógicamente interrelacionadas, distribuidas físicamente sobre una red de computadoras, de modo que para el usuario final el sistema se comporta como si fuera una única base de datos centralizada \cite{ozsu2020principles}. El sistema de software que administra esta colección y hace transparente su distribución ante las aplicaciones se denomina sistema de gestión de bases de datos distribuidas (SGBDD) \cite{ozsu2020principles}. Esta distinción es fundamental: mientras la BDD es el conjunto de datos físicamente repartidos, el SGBDD es el motor que coordina el acceso, la actualización y la consistencia de dichos datos sin que el usuario deba conocer su ubicación real \cite{kleppmann2017designing}.
+
+El diseño de un SGBDD se orienta tradicionalmente por los doce objetivos formulados por C.J. Date, que buscan que un sistema distribuido se comporte, desde la perspectiva del usuario, de forma equivalente a un sistema centralizado. Entre estos objetivos se destacan: la autonomía local de cada nodo, la ausencia de dependencia de un sitio central, la operación continua del sistema, la independencia respecto a la ubicación de los datos, la independencia de fragmentación, la independencia de replicación, el procesamiento distribuido de consultas, la gestión distribuida de transacciones, la independencia del hardware, la independencia del sistema operativo, la independencia de la red de comunicaciones y la independencia del SGBD subyacente \cite{ozsu2020principles}. En conjunto, estos objetivos plantean un ideal de transparencia casi total, aunque en la práctica los sistemas reales, como CockroachDB, priorizan un subconjunto de ellos según sus casos de uso.
+
+\textit{Nota de verificación: la lista anterior de los doce objetivos de Date corresponde a la versión estándar más citada en la literatura académica; se recomienda contrastarla contra la edición específica de Özsu y Valduriez disponible para el equipo antes de la entrega final.}
+
+En cuanto a las arquitecturas de referencia, la literatura distingue principalmente tres modelos organizativos. La arquitectura cliente-servidor separa la lógica de gestión de datos (servidor) de la lógica de aplicación (cliente), permitiendo que varios clientes accedan a uno o más servidores especializados \cite{ozsu2020principles}. La arquitectura colaborativa (peer-to-peer) elimina la distinción rígida entre cliente y servidor: cada nodo puede actuar simultáneamente como proveedor y consumidor de datos, un patrón que adoptan sistemas modernos como CockroachDB, donde cualquier nodo puede recibir y coordinar una consulta \cite{ozsu2020principles}. Finalmente, la arquitectura basada en middleware introduce una capa intermedia que abstrae la heterogeneidad de los sistemas subyacentes, facilitando la integración de fuentes de datos diversas \cite{kleppmann2017designing}.
+
+Un concepto central en el diseño de BDD es la transparencia, entendida como la ocultación de los detalles de implementación distribuida ante el usuario o la aplicación. Se reconocen ocho formas de transparencia: la transparencia de fragmentación, que oculta cómo se dividen las tablas; la transparencia de replicación, que oculta la existencia de copias redundantes; la transparencia de ubicación, que evita que el usuario conozca el nodo físico donde residen los datos; la transparencia de acceso, que unifica la interfaz de consulta independientemente del origen de los datos; la transparencia de concurrencia, que garantiza que las transacciones concurrentes no interfieran entre sí de forma visible; la transparencia de fallos, que permite que el sistema continúe operando ante la caída de un nodo; la transparencia de escalabilidad, que permite añadir nodos sin afectar las aplicaciones existentes; y la transparencia de evolución, que permite modificar el esquema sin interrumpir el servicio \cite{ozsu2020principles}.
+
+Por último, es necesario distinguir entre BDD homogéneas, donde todos los nodos ejecutan el mismo SGBD y comparten un esquema común, y BDD heterogéneas, donde coexisten distintos motores de bases de datos y modelos de datos, lo que exige mecanismos de traducción y mediación adicionales \cite{ozsu2020principles}. En el contexto del presente proyecto, el clúster CockroachDB implementado constituye una BDD homogénea de tipo colaborativo, donde los tres nodos ejecutan el mismo motor y cooperan bajo el algoritmo de consenso Raft. La aplicación al dominio del PFC de Soporte Técnico ISP resulta pertinente porque el sistema de gestión de tickets requiere transparencia de fragmentación (los tickets se dividen por región) y transparencia de fallos (el servicio de soporte no puede interrumpirse ante la caída de un nodo), ejercitando así los principios fundamentales expuestos en esta sección.
+
+\subsection{Fragmentación y Replicación de Datos}
+
+La fragmentación es el proceso mediante el cual una relación global $R$ se divide en subconjuntos más pequeños, denominados fragmentos, que se distribuyen físicamente entre los distintos nodos del sistema \cite{ozsu2020principles}. Para que una fragmentación sea correcta desde el punto de vista formal, debe satisfacer tres condiciones fundamentales. La condición de completitud exige que todo dato presente en la relación original pueda reconstruirse a partir de sus fragmentos, sin pérdida de información \cite{ozsu2020principles}. La condición de reconstrucción garantiza que, mediante un operador relacional adecuado, sea posible reconstruir la relación original $R$ a partir de la unión (en el caso horizontal) o de la combinación por junta (en el caso vertical) de sus fragmentos \cite{ozsu2020principles}. Finalmente, la condición de disjunción establece que, en la fragmentación horizontal, los fragmentos no deben compartir tuplas entre sí, evitando así redundancia no controlada \cite{ozsu2020principles}.
+
+Formalmente, la fragmentación horizontal primaria de una relación $R$ mediante un predicado $p_i$ se expresa utilizando el operador de selección $\sigma$ del álgebra relacional:
+\begin{equation}
+R_i = \sigma_{p_i}(R)
+\end{equation}
+cumpliéndose las condiciones de completitud y disjunción:
+\begin{align}
+\bigcup_{i=1}^{n} R_i &= R \quad \text{(completitud)} \\
+R_i \cap R_j &= \emptyset \quad \forall i \neq j \quad \text{(disjunción)}
+\end{align}
+En el caso de la fragmentación horizontal derivada, un fragmento de una relación dependiente se define en función de la fragmentación ya realizada sobre una relación propietaria, mediante el operador de semi-junta $\ltimes$:
+\begin{equation}
+R_i = R \ltimes R'_i
+\end{equation}
+donde $R'_i$ representa el fragmento correspondiente de la relación propietaria \cite{ozsu2020principles}.
+
+La fragmentación vertical, por su parte, divide una relación en subconjuntos de atributos en lugar de tuplas, agrupando las columnas según su afinidad de uso: aquellos atributos que suelen consultarse conjuntamente en las mismas transacciones se agrupan en un mismo fragmento, reduciendo así la necesidad de operaciones de junta costosas entre nodos \cite{ozsu2020principles}. Cuando una relación no puede fragmentarse adecuadamente mediante un único criterio, se recurre a la fragmentación mixta o híbrida, que combina fragmentación horizontal y vertical de forma sucesiva, ajustándose a patrones de acceso más complejos \cite{ozsu2020principles}.
+
+En cuanto a la replicación, esta consiste en el mantenimiento de copias idénticas de un fragmento en más de un nodo del sistema, con el objetivo de aumentar la disponibilidad y tolerancia a fallos \cite{kleppmann2017designing}. La replicación síncrona exige que todas las réplicas confirmen la escritura antes de que esta se considere completada, garantizando consistencia fuerte a costa de mayor latencia, especialmente en entornos geodistribuidos \cite{viotti2016consistency}. La replicación asíncrona, en cambio, confirma la escritura tan pronto como la réplica primaria la procesa, propagando el cambio a las demás réplicas en segundo plano; esto reduce la latencia percibida por el cliente, pero introduce una ventana temporal de inconsistencia entre réplicas \cite{viotti2016consistency}. CockroachDB adopta un enfoque de replicación síncrona basada en el algoritmo de consenso Raft, donde una escritura solo se confirma una vez que la mayoría (quórum) de las réplicas del rango correspondiente ha registrado la entrada en su log, lo cual constituye un compromiso deliberado entre consistencia y disponibilidad \cite{taft2020cockroachdb}.
+
+En el contexto del PFC de Soporte Técnico ISP, la estrategia de fragmentación horizontal aplicada a la tabla \texttt{tickets} mediante el atributo \texttt{region} resulta directamente justificable con los conceptos anteriores: cada fragmento $R_i$ corresponde a los tickets de una región geográfica específica (norte, centro, sur), cumpliendo la condición de disjunción al no existir solapamiento entre regiones, y la condición de completitud al garantizar que la unión de los tres fragmentos reconstruye la totalidad de los tickets del sistema.
+
+\subsection{Control de Concurrencia Distribuido y Consenso}
+
+El control de concurrencia en bases de datos distribuidas aborda el problema de garantizar que múltiples transacciones que se ejecutan simultáneamente sobre distintos nodos no produzcan resultados inconsistentes, preservando las propiedades ACID a pesar de la ausencia de un reloj global compartido \cite{ozsu2020principles}. A diferencia de un sistema centralizado, en un entorno distribuido cada nodo puede poseer una visión parcial del estado del sistema, lo que complica la detección de conflictos entre transacciones concurrentes \cite{steen2023distributed}.
+
+Uno de los mecanismos clásicos para resolver este problema es el protocolo de bloqueo en dos fases (2PL), en el cual una transacción atraviesa una fase de crecimiento, durante la cual únicamente adquiere bloqueos, y una fase de decrecimiento, durante la cual únicamente los libera, garantizando serializabilidad \cite{ozsu2020principles}. Su variante estricta, el protocolo S2PL (Strict 2PL), exige además que todos los bloqueos de escritura se mantengan hasta el momento del compromiso (\textit{commit}) de la transacción, evitando lecturas sucias y facilitando la recuperación ante fallos \cite{ozsu2020principles}. En un entorno distribuido, la aplicación de 2PL requiere coordinación entre los nodos que participan en una transacción, lo cual incrementa la latencia y el riesgo de interbloqueos (\textit{deadlocks}) distribuidos.
+
+La detección de interbloqueos distribuidos se realiza habitualmente mediante grafos de espera (\textit{wait-for graphs}), donde cada nodo del grafo representa una transacción y cada arista indica que una transacción espera la liberación de un recurso bloqueado por otra \cite{ozsu2020principles}. Cuando este grafo, construido de forma distribuida a partir de la información local de cada nodo, contiene un ciclo, se confirma la existencia de un interbloqueo que debe resolverse abortando alguna de las transacciones involucradas \cite{steen2023distributed}.
+
+Para garantizar la atomicidad de transacciones que abarcan múltiples nodos, se emplea el protocolo de compromiso en dos fases (2PC). En la primera fase (\textit{voting phase}), un coordinador solicita a todos los participantes que confirmen si están en condiciones de comprometer la transacción; en la segunda fase (\textit{commit phase}), si todos los participantes responden afirmativamente, el coordinador ordena el compromiso definitivo, y en caso contrario, ordena su aborto \cite{ozsu2020principles}. El principal punto débil de 2PC es su vulnerabilidad ante la caída del coordinador tras la fase de votación: los participantes que ya votaron afirmativamente quedan bloqueados, sin poder decidir de forma autónoma si comprometer o abortar, hasta que el coordinador se recupere \cite{ozsu2020principles}. El protocolo de compromiso en tres fases (3PC) introduce una fase intermedia adicional (\textit{pre-commit}) que reduce, aunque no elimina completamente, este riesgo de bloqueo indefinido, a costa de mayor latencia y complejidad \cite{steen2023distributed}.
+
+Frente a las limitaciones de 2PC y 3PC en presencia de fallos del coordinador, los sistemas distribuidos modernos como CockroachDB recurren a algoritmos de consenso como Raft, diseñado explícitamente para ser comprensible y verificable \cite{ongaro2014raft}. Raft organiza el clúster en torno a un único líder elegido por mayoría de votos entre los nodos disponibles; todas las escrituras se dirigen a este líder, quien las registra en su log y las replica a los nodos seguidores mediante mensajes \texttt{AppendEntries} \cite{ongaro2014raft}. Una entrada de log se considera comprometida únicamente cuando ha sido replicada en la mayoría (quórum) de los nodos del clúster, lo que garantiza que, incluso ante la caída de una minoría de nodos, el sistema conserve un registro consistente y pueda continuar operando \cite{ongaro2014raft}. Si el líder deja de enviar señales de vida (\textit{heartbeats}) dentro de un intervalo de tiempo determinado, los seguidores inician un proceso de elección mediante mensajes \texttt{RequestVote}, postulándose como candidatos hasta que uno de ellos obtenga la mayoría de votos y asuma el liderazgo \cite{ongaro2014raft}. CockroachDB implementa este mecanismo a nivel de cada rango (\textit{range}) de datos, de modo que distintos rangos pueden tener líderes distintos distribuidos entre los nodos del clúster \cite{taft2020cockroachdb}.
+
+En el experimento realizado sobre el PFC de Soporte Técnico ISP, este marco teórico se verifica directamente: al detener el nodo \texttt{crdb-node2}, el líder del rango correspondiente a la tabla \texttt{tickets} conserva el quórum con los dos nodos restantes, permitiendo que las consultas continúen respondiendo correctamente sin necesidad de una nueva elección de líder, dado que el nodo caído era un seguidor y no el líder del rango afectado.
+
+\subsection{Consistencia, Disponibilidad, PACELC y Sistemas NewSQL/NoSQL}
+
+El teorema CAP, formalizado por Gilbert y Lynch a partir de la conjetura original de Brewer, establece que un sistema de almacenamiento distribuido no puede garantizar simultáneamente las tres propiedades de consistencia (\textit{Consistency}), disponibilidad (\textit{Availability}) y tolerancia a particiones (\textit{Partition tolerance}); ante la ocurrencia de una partición de red, el sistema debe sacrificar necesariamente consistencia o disponibilidad \cite{gilbert2002brewer}. Esta formalización demuestra matemáticamente, mediante un modelo de sistema asíncrono con al menos dos nodos, que ningún algoritmo puede satisfacer las tres garantías de forma simultánea cuando existen mensajes que pueden perderse \cite{gilbert2002brewer}.
+
+Doce años después de su conjetura original, Brewer revisó y matizó su planteamiento, señalando que la disyuntiva entre consistencia y disponibilidad no es absoluta ni permanente, sino que ocurre únicamente durante el intervalo en que la partición está activa, y que los sistemas reales pueden aplicar estrategias de mitigación, como la degradación parcial del servicio o la reconciliación posterior al restablecimiento de la comunicación \cite{brewer2012cap}. Esta reinterpretación es relevante porque evita la lectura simplista de CAP como una elección binaria y permanente, y reconoce que un mismo sistema puede comportarse de forma distinta ante distintos tipos de operación.
+
+Ante las limitaciones de CAP para describir el comportamiento de un sistema en ausencia de particiones, Abadi propuso el modelo PACELC, que extiende el análisis señalando que, incluso cuando la red opera con normalidad (\textit{Else}), todo sistema distribuido debe elegir entre latencia (\textit{Latency}) y consistencia (\textit{Consistency}), además de la disyuntiva entre disponibilidad y consistencia durante una partición (\textit{Partition}) \cite{abadi2012consistency}. Este modelo resulta particularmente relevante para bases de datos geodistribuidas, donde la latencia de red entre regiones geográficas impone una tensión constante entre la velocidad de respuesta y el nivel de consistencia garantizado, incluso en condiciones normales de operación \cite{abadi2012consistency}.
+
+El espectro de modelos de consistencia en sistemas de almacenamiento no transaccionales es amplio y no se limita a la dicotomía entre consistencia fuerte y consistencia eventual. Viotti y Vukolić catalogan sistemáticamente decenas de modelos intermedios, como la consistencia causal, la consistencia de sesión y la consistencia acotada por tiempo, cada uno con distintas garantías sobre el orden y la visibilidad de las operaciones de escritura entre réplicas \cite{viotti2016consistency}. En este espectro, CockroachDB se ubica en el extremo de mayor garantía, al implementar un nivel de aislamiento serializable mediante un protocolo de concurrencia optimista combinado con relojes híbridos, lo que le permite ofrecer consistencia fuerte equivalente a la de un sistema centralizado, incluso operando de forma distribuida \cite{taft2020cockroachdb}.
+
+En contraste, los sistemas NoSQL adoptan con frecuencia modelos de consistencia más relajados en favor de la disponibilidad y el rendimiento. Dynamo, el almacén clave-valor desarrollado por Amazon, prioriza la disponibilidad mediante replicación con \textit{quorum} ajustable y resolución de conflictos en el lado del cliente, aceptando consistencia eventual como compromiso de diseño \cite{decandia2007dynamo}. Spanner, por su parte, representa un caso híbrido dentro de la categoría NewSQL: combina un modelo relacional con distribución global y logra consistencia externa (\textit{external consistency}) mediante el uso de relojes atómicos y GPS sincronizados con una cota de incertidumbre acotada (TrueTime) \cite{corbett2013spanner}. Apache Cassandra, un sistema de almacenamiento columnar descentralizado, adopta un modelo de consistencia eventual ajustable por operación, permitiendo al desarrollador equilibrar consistencia y disponibilidad según el nivel de consistencia (\textit{consistency level}) configurado en cada lectura o escritura \cite{lakshman2010cassandra}. MongoDB, como base de datos orientada a documentos, ofrece un modelo flexible que permite tanto lecturas eventualmente consistentes como transacciones multidocumento con garantías ACID, dependiendo de la configuración del nivel de \textit{write concern} y \textit{read concern} establecido \cite{samala2024mongodb}.
+
+La comparación entre CockroachDB, MongoDB y Cassandra en el eje consistencia/disponibilidad/latencia (C/A/L) evidencia posicionamientos claramente diferenciados dentro del espectro PACELC. CockroachDB se orienta hacia PC/EC: prioriza consistencia tanto durante una partición como en operación normal, asumiendo mayor latencia como costo \cite{taft2020cockroachdb}. Cassandra se orienta hacia PA/EL: prioriza disponibilidad y baja latencia tanto durante una partición como en operación normal, relegando la consistencia fuerte a una opción configurable \cite{lakshman2010cassandra}. MongoDB ocupa una posición intermedia, dado que su comportamiento por defecto favorece la disponibilidad, pero permite configurar niveles de consistencia más estrictos a costa de latencia adicional, aproximándose a PA/EC según la configuración elegida \cite{samala2024mongodb}.
+
+\begin{table}[H]
+\centering
+\caption{Comparación de CockroachDB, MongoDB y Cassandra según el modelo PACELC}
+\label{tab:pacelc-comparacion}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Criterio} & \textbf{CockroachDB} & \textbf{MongoDB} & \textbf{Cassandra} \\
+\midrule
+Modelo de datos & Relacional (NewSQL) & Documental (NoSQL) & Columnar (NoSQL) \\
+Consistencia (partición) & Consistente (PC) & Configurable & Disponible (PA) \\
+Consistencia (normal) & Consistente (EC) & Configurable & Baja latencia (EL) \\
+Clasificación PACELC & PC/EC & PA/EC (config.) & PA/EL \\
+Aislamiento & Serializable & Configurable & Eventual (ajustable) \\
+Referencia & \cite{taft2020cockroachdb} & \cite{samala2024mongodb} & \cite{lakshman2010cassandra} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Para el dominio del PFC de Soporte Técnico ISP, esta discusión resulta directamente aplicable: un sistema de gestión de tickets que registra el estado de atención al cliente requiere consistencia fuerte para evitar que dos agentes de soporte modifiquen simultáneamente el mismo ticket con información contradictoria, lo que justifica la elección de CockroachDB frente a alternativas orientadas a disponibilidad como Cassandra.
+
+% ============================================================
+% SECCIÓN 6: PROCEDIMIENTO APLICADO
+% ============================================================
+\section{Procedimiento Aplicado}
+\label{procedimiento}
+
+En esta sección se documenta la implementación práctica del clúster de base de datos distribuida CockroachDB, aplicado al esquema de datos del dominio ACC -- Soporte Técnico ISP, siguiendo la metodología establecida en la guía de práctica GA-SUM-03/PE-U3.
+
+\subsection{Levantamiento del Clúster CockroachDB}
+
+El clúster se implementó mediante contenedores Docker orquestados con Docker Compose, definiendo tres nodos CockroachDB interconectados por una red de tipo \textit{bridge} denominada \texttt{roach-net}, además de una cuarta instancia de nodo único destinada exclusivamente a la comparación de rendimiento del Paso 4. Cada nodo expone un puerto SQL individual (26257, 26258 y 26259 respectivamente) y un puerto de consola web (8080, 8081 y 8082), permitiendo el acceso independiente a cada réplica durante las pruebas. La configuración incluye un límite de memoria de 512\,MB por contenedor (\texttt{mem\_limit}), verificaciones de estado (\texttt{healthcheck}) mediante solicitudes HTTP al endpoint de salud de cada nodo, y volúmenes persistentes individuales que preservan los datos entre reinicios del contenedor.
+
+\begin{lstlisting}[style=yamlstyle, caption={Configuración de Docker Compose para el clúster de 3 nodos CockroachDB}, label={lst:docker-compose}]
+version: '3.8'
+
+networks:
+  roach-net:
+    driver: bridge
+
+services:
+  crdb-node1:
+    image: cockroachdb/cockroach:v24.3.0
+    container_name: crdb-node1
+    hostname: crdb-node1
+    networks:
+      - roach-net
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    volumes:
+      - node1-data:/cockroach/cockroach-data
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --advertise-addr=crdb-node1
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  crdb-node2:
+    image: cockroachdb/cockroach:v24.3.0
+    container_name: crdb-node2
+    hostname: crdb-node2
+    networks:
+      - roach-net
+    ports:
+      - "26258:26257"
+      - "8081:8080"
+    volumes:
+      - node2-data:/cockroach/cockroach-data
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --advertise-addr=crdb-node2
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  crdb-node3:
+    image: cockroachdb/cockroach:v24.3.0
+    container_name: crdb-node3
+    hostname: crdb-node3
+    networks:
+      - roach-net
+    ports:
+      - "26259:26257"
+      - "8082:8080"
+    volumes:
+      - node3-data:/cockroach/cockroach-data
+    command: start --insecure --join=crdb-node1,crdb-node2,crdb-node3 --advertise-addr=crdb-node3
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  cockroach-single:
+    image: cockroachdb/cockroach:v24.3.0
+    container_name: cockroach-single
+    hostname: cockroach-single
+    networks:
+      - roach-net
+    ports:
+      - "26260:26257"
+      - "8083:8080"
+    volumes:
+      - single-data:/cockroach/cockroach-data
+    command: start-single-node --insecure --advertise-addr=cockroach-single
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
+  single-data:
+\end{lstlisting}
+
+Una vez levantados los contenedores mediante \texttt{docker compose up -d}, el clúster de tres nodos se inicializó ejecutando \texttt{cockroach init} desde el primer nodo, y su estado se verificó mediante el comando \texttt{node status}, confirmando que los tres nodos reportaran \texttt{is\_live=true}. La Figura~\ref{fig:dashboard-cluster} muestra el panel de control (\textit{Dashboard}) de CockroachDB accedido en \texttt{http://localhost:8080}, evidenciando los tres nodos activos ejecutando la versión v24.3.0, con licencia Enterprise Free activa (359 días de vigencia restante al momento de la captura) y una distribución saludable de 55 rangos totales, sin rangos infrarreplicados ni no disponibles.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{cluster.png}
+    \caption{Panel de control de CockroachDB mostrando los 3 nodos activos del clúster (v24.3.0, licencia Enterprise Free activa)}
+    \label{fig:dashboard-cluster}
+\end{figure}
+
+Previo a la aplicación de la estrategia de fragmentación, fue necesario activar una licencia CockroachDB Enterprise Free en el clúster, dado que a partir de la versión 24.3.0 las funciones de particionamiento explícito (\texttt{PARTITION BY LIST}/\texttt{RANGE}) requieren dicha licencia bajo el nuevo modelo de licenciamiento de Cockroach Labs. La licencia, gratuita para uso académico no comercial, se activó mediante:
+\begin{lstlisting}[style=sqlstyle, caption={Activación de licencia Enterprise Free en el clúster}, label={lst:licencia}]
+SET CLUSTER SETTING enterprise.license = '<clave_generada>';
+SHOW CLUSTER SETTING enterprise.license;
+\end{lstlisting}
+
+\subsection{Implementación del Esquema del PFC}
+
+Sobre el clúster inicializado se creó la base de datos \texttt{isp\_soporte}, correspondiente al dominio ACC -- Soporte Técnico ISP, compuesta por tres tablas relacionadas: \texttt{clientes}, \texttt{tickets} e \texttt{historial\_estados}. La tabla \texttt{tickets} adopta una clave primaria compuesta por \texttt{(region, ticket\_id)}, decisión de diseño que anticipa directamente la estrategia de fragmentación horizontal por región descrita en la Sección~\ref{fragmentacion-aplicada}, dado que en CockroachDB la clave de partición debe formar parte de la clave primaria de la tabla.
+
+\begin{lstlisting}[style=sqlstyle, caption={Esquema de base de datos del dominio ACC -- Soporte Técnico ISP}, label={lst:schema}]
+CREATE DATABASE IF NOT EXISTS isp_soporte;
+USE isp_soporte;
+
+CREATE TABLE IF NOT EXISTS clientes (
+    cliente_id UUID DEFAULT gen_random_uuid(),
+    nombre STRING(100) NOT NULL,
+    correo STRING(100) NOT NULL UNIQUE,
+    telefono STRING(20),
+    plan_contratado STRING(50) NOT NULL,
+    estado STRING(20) DEFAULT 'activo',
+    creado_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT pk_clientes PRIMARY KEY (cliente_id),
+    CONSTRAINT chk_estado_cliente CHECK (estado IN ('activo', 'suspendido', 'retirado'))
+);
+
+CREATE TABLE IF NOT EXISTS tickets (
+    ticket_id UUID DEFAULT gen_random_uuid(),
+    region STRING(20) NOT NULL,
+    cliente_id UUID NOT NULL,
+    asunto STRING(150) NOT NULL,
+    descripcion TEXT,
+    prioridad STRING(20) NOT NULL DEFAULT 'media',
+    estado STRING(20) NOT NULL DEFAULT 'abierto',
+    creado_at TIMESTAMP DEFAULT now(),
+    cerrado_at TIMESTAMP,
+    CONSTRAINT pk_tickets PRIMARY KEY (region, ticket_id),
+    CONSTRAINT fk_tickets_clientes FOREIGN KEY (cliente_id)
+        REFERENCES clientes(cliente_id) ON DELETE CASCADE,
+    CONSTRAINT chk_region CHECK (region IN ('Norte', 'Centro', 'Sur')),
+    CONSTRAINT chk_prioridad CHECK (prioridad IN ('baja', 'media', 'alta', 'critica')),
+    CONSTRAINT chk_estado_ticket CHECK (estado IN ('abierto', 'en_proceso', 'resuelto', 'cerrado'))
+);
+
+CREATE TABLE IF NOT EXISTS historial_estados (
+    historial_id UUID DEFAULT gen_random_uuid(),
+    region STRING(20) NOT NULL,
+    ticket_id UUID NOT NULL,
+    estado_anterior STRING(20),
+    estado_nuevo STRING(20) NOT NULL,
+    comentario TEXT,
+    tecnico_asignado STRING(100),
+    actualizado_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT pk_historial PRIMARY KEY (region, historial_id),
+    CONSTRAINT fk_historial_tickets FOREIGN KEY (region, ticket_id)
+        REFERENCES tickets(region, ticket_id) ON DELETE CASCADE
+);
+\end{lstlisting}
+
+La carga inicial de datos se realizó mediante un script Python (\texttt{seed\_data.py}) que emplea la librería \texttt{Faker} en configuración regional española para generar registros sintéticos representativos del dominio, e inserta los datos en bloques mediante \texttt{execute\_values} de \texttt{psycopg2} para optimizar el rendimiento de la carga masiva. Se generaron 2\,000 clientes, 6\,000 tickets distribuidos aleatoriamente entre las tres regiones operativas (Norte, Centro, Sur) y 4\,500 entradas de historial de auditoría, totalizando 12\,500 registros, superando el mínimo de 10\,000 exigido por la guía.
+
+\subsubsection{Fragmentación horizontal aplicada}
+\label{fragmentacion-aplicada}
+
+Sobre la tabla principal \texttt{tickets} se aplicó una fragmentación horizontal explícita mediante \texttt{PARTITION BY LIST}, utilizando el atributo \texttt{region} como clave de partición. Esta decisión se justifica técnicamente porque las consultas más frecuentes del dominio de soporte técnico (asignación de tickets a técnicos, reportes gerenciales, monitoreo de carga operativa) se filtran predominantemente por región geográfica, por lo que colocar físicamente los datos de cada región en un rango independiente reduce la dispersión de las consultas entre nodos.
+
+\begin{lstlisting}[style=sqlstyle, caption={Fragmentación horizontal por región en la tabla \texttt{tickets}}, label={lst:partitions}]
+ALTER TABLE tickets PARTITION BY LIST (region) (
+    PARTITION p_norte VALUES IN ('Norte'),
+    PARTITION p_centro VALUES IN ('Centro'),
+    PARTITION p_sur VALUES IN ('Sur')
+);
+
+ALTER TABLE historial_estados PARTITION BY LIST (region) (
+    PARTITION p_norte VALUES IN ('Norte'),
+    PARTITION p_centro VALUES IN ('Centro'),
+    PARTITION p_sur VALUES IN ('Sur')
+);
+\end{lstlisting}
+
+La declaración lógica de las particiones se verificó mediante \texttt{SHOW PARTITIONS FROM TABLE tickets;}, confirmando la existencia de las tres particiones con sus valores correspondientes (Tabla~\ref{tab:particiones}). Posteriormente, se forzó la división física de los rangos mediante \texttt{ALTER TABLE tickets SPLIT AT VALUES ('Norte'), ('Centro'), ('Sur');}, dado que el volumen de datos de la tabla no alcanzaba el umbral de tamaño (512\,MB) que dispara la división automática de rangos. La distribución física resultante se verificó mediante \texttt{SHOW RANGES FROM TABLE tickets;}, cuyos resultados se documentan en la Tabla~\ref{tab:rangos}.
+
+\begin{table}[H]
+\centering
+\caption{Particiones aplicadas sobre la tabla \texttt{tickets} tras la fragmentación horizontal por región}
+\label{tab:particiones}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Partición} & \textbf{Columna} & \textbf{Valor} & \textbf{Réplicas} \\
+\midrule
+p\_norte  & region & ('Norte')  & 3 \\
+p\_centro & region & ('Centro') & 3 \\
+p\_sur    & region & ('Sur')    & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Distribución física de rangos de la tabla \texttt{tickets} tras el forzado de división (\texttt{SPLIT AT})}
+\label{tab:rangos}
+\begin{tabular}{@{}lllc@{}}
+\toprule
+\textbf{Range ID} & \textbf{Start Key} & \textbf{End Key} & \textbf{Lease Holder} \\
+\midrule
+68 & NULL      & /"Centro" & n3 \\
+71 & /"Centro" & /"Norte"  & n1 \\
+70 & /"Norte"  & /"Sur"    & n1 \\
+72 & /"Sur"    & NULL      & n1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Verificación de Tolerancia a Fallos}
+
+Con el objetivo de comprobar experimentalmente la capacidad del clúster para mantener el servicio ante la caída de un nodo, se automatizó la prueba de tolerancia a fallos mediante el script \texttt{fault\_tolerance.py}, estructurado en seis fases secuenciales.
+
+En la Fase 1 se verificó el estado inicial del clúster, confirmando los tres nodos activos (\texttt{is\_live=true}). En la Fase 2 se comprobó la operatividad completa del sistema mediante una lectura (\texttt{SELECT COUNT(*) FROM tickets}, que reportó 6\,003 registros en 82.82\,ms) y una escritura de prueba exitosa. En la Fase 3 se simuló la caída de un nodo deteniendo el contenedor \texttt{crdb-node2} mediante \texttt{docker stop}.
+
+La Fase 4 constituye el punto central del experimento: con el nodo detenido, el clúster quedó operando con 2 de 3 nodos activos. Se ejecutó nuevamente la consulta de conteo, obteniendo una respuesta exitosa de 6\,004 registros en 5.6\,ms, además de una escritura de prueba adicional también exitosa. La Tabla~\ref{tab:rangos-fallo} documenta la distribución de rangos de la tabla \texttt{tickets} durante la caída del nodo, confirmando que las particiones \texttt{p\_centro}, \texttt{p\_norte} y \texttt{p\_sur} mantuvieron su \textit{lease holder} activo en los nodos 1 y 3, sin depender del nodo caído.
+
+\begin{table}[H]
+\centering
+\caption{Distribución de rangos de la tabla \texttt{tickets} durante la caída del Nodo 2}
+\label{tab:rangos-fallo}
+\begin{tabular}{@{}lllc@{}}
+\toprule
+\textbf{Range ID} & \textbf{Start Key} & \textbf{End Key} & \textbf{Lease Holder} \\
+\midrule
+68 & NULL      & /"Centro" & n3 \\
+71 & /"Centro" & /"Norte"  & n1 \\
+70 & /"Norte"  & /"Sur"    & n1 \\
+72 & /"Sur"    & NULL      & n1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Este resultado confirma experimentalmente el comportamiento teórico del algoritmo de consenso Raft descrito en la Sección~\ref{fundamento-teorico}: dado que el nodo detenido (\texttt{crdb-node2}) no ostentaba el liderazgo (\textit{lease}) de ninguno de los rangos de la tabla principal, el clúster no requirió un proceso de elección de nuevo líder, y las operaciones de lectura y escritura continuaron respondiendo con normalidad gracias al quórum mantenido por los nodos 1 y 3.
+
+En la Fase 5 se reinició el nodo detenido mediante \texttt{docker start}, midiéndose un tiempo de reintegración al clúster de \textbf{2.0 segundos} hasta alcanzar nuevamente el estado \texttt{is\_live=true}. Finalmente, en la Fase 6 se verificó que el clúster recuperó su estado completo de 3/3 nodos activos, con la distribución de rangos idéntica a la observada durante el fallo, confirmando que el nodo reincorporado recibió correctamente la sincronización del log de transacciones replicado durante su ausencia.
+
+La Figura~\ref{fig:raft-secuencia} ilustra mediante un diagrama de secuencia UML de elaboración propia el comportamiento descrito, mostrando la interacción entre el cliente, el nodo líder y los nodos seguidores durante el ciclo completo de caída y recuperación del Nodo 2.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{diagrama_raft_secuencia.png}
+    \caption{Diagrama de secuencia UML del comportamiento Raft durante la caída del Nodo 2 (elaboración propia)}
+    \label{fig:raft-secuencia}
+\end{figure}
+
+La evidencia audiovisual completa de esta prueba, mostrando en tiempo real las seis fases descritas, se encuentra disponible en el repositorio del proyecto, en la carpeta \texttt{video\_tolerancia.mp4}.
+
+\subsection{Medición de Rendimiento}
+\label{procedimiento-consultas}
+
+Con el propósito de comparar cuantitativamente el rendimiento del clúster distribuido de tres nodos frente a una instancia de nodo único, se ejecutaron cinco consultas representativas del dominio: (C1) un \texttt{JOIN} entre las tablas \texttt{clientes} y \texttt{tickets}, (C2) una agregación \texttt{GROUP BY} por región y prioridad, (C3) una búsqueda puntual por clave primaria compuesta, (C4) una consulta de rango filtrada por prioridad y fecha, y (C5) una subconsulta correlacionada. El tiempo de respuesta de cada una se midió mediante el script \texttt{run\_benchmark.py}, que emplea \texttt{time.perf\_counter()} de Python para una medición de alta precisión. El factor de desempeño se calcula como el cociente entre el tiempo del clúster y el tiempo del nodo único; valores inferiores a 1 indican que el clúster fue más rápido, mientras que valores superiores a 1 indican que el clúster fue más lento que el nodo único.
+
+\begin{table}[H]
+\centering
+\caption{Comparación de tiempos de ejecución entre clúster (3 nodos) y nodo único}
+\label{tab:benchmark}
+\footnotesize
+\begin{tabular}{@{}lcccl@{}}
+\toprule
+\textbf{Consulta} & \textbf{Clúster (ms)} & \textbf{Nodo único (ms)} & \textbf{Factor} & \textbf{Interpretación} \\
+\midrule
+C1: JOIN                  & 26.84 & 34.84 & 0.77x & 23\% más rápido \\
+C2: GROUP BY               & 10.28 & 8.94  & 1.15x & 15\% más lento \\
+C3: Búsqueda puntual (PK)  & 3.31  & 4.70  & 0.70x & 30\% más rápido \\
+C4: Rango (WHERE)          & 11.14 & 10.27 & 1.08x & 8\% más lento \\
+C5: Subconsulta correlacionada & 22.74 & 19.73 & 1.15x & 15\% más lento \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Los resultados evidencian un patrón consistente con el comportamiento esperado de un sistema distribuido: el clúster obtiene ventaja de rendimiento en las consultas C1 y C3, donde el motor de ejecución de CockroachDB puede resolver la operación aprovechando la localización de datos y el enrutamiento directo hacia el rango correspondiente, distribuyendo la carga de lectura entre los tres nodos disponibles. Cabe señalar que la Consulta C3 se ejecutó contra una clave primaria de referencia que no corresponde a un registro existente en el conjunto de datos, por lo que el tiempo medido refleja principalmente el costo de localización y verificación de ausencia del registro en el índice primario, más que el costo completo de recuperación y transferencia de una fila real; aun así, el resultado es cualitativamente consistente con el comportamiento esperado de una búsqueda puntual eficiente por clave primaria.
+
+En contraste, las consultas C2, C4 y C5 muestran un rendimiento levemente inferior en el clúster, lo cual se explica por el costo de coordinación adicional que impone la arquitectura distribuida: las operaciones de agregación (C2) requieren combinar resultados parciales provenientes de múltiples rangos residentes en distintos nodos, la consulta de rango (C4) debe recorrer segmentos que pueden abarcar más de una partición, y la subconsulta correlacionada (C5) ejecuta una consulta anidada por cada fila del resultado externo, multiplicando el número de \textit{round-trips} de red entre nodos.
+
+Es importante señalar que las diferencias de rendimiento observadas son moderadas (entre 8\% y 30\% en cualquier dirección), lo cual resulta razonable dado el volumen de datos manejado (12\,500 registros totales) y las condiciones de red local del entorno de pruebas; en un despliegue geodistribuido con nodos separados por mayor latencia de red, se esperaría que la brecha de rendimiento entre el nodo único y el clúster se acentuara para las consultas que requieren coordinación entre rangos.
+
+% ============================================================
+% SECCIÓN 7: RESULTADOS
+% ============================================================
+\section{Resultados}
+\label{resultados}
+
+La presente sección consolida de forma objetiva los resultados obtenidos durante la ejecución del procedimiento experimental, sin incluir aún su interpretación, la cual se desarrolla en la Sección~\ref{analisis-critico}.
+
+\subsection{Resultados de la implementación del clúster}
+
+El clúster CockroachDB de tres nodos se levantó exitosamente mediante Docker Compose, alcanzando el estado \texttt{is\_live=true} en los tres nodos tras la inicialización. El panel de control confirmó una capacidad de almacenamiento utilizada de 533.7\,MiB sobre 2.7\,TiB disponibles (0.0\% de uso), con 55 rangos totales replicados y cero rangos infrarreplicados o no disponibles, evidenciando un estado de replicación saludable desde el arranque del sistema.
+
+\subsection{Resultados del esquema y la fragmentación}
+
+Se implementaron las tres tablas relacionales del dominio (\texttt{clientes}, \texttt{tickets}, \texttt{historial\_estados}), pobladas con un total de 12\,500 registros: 2\,000 clientes, 6\,000 tickets y 4\,500 entradas de historial de auditoría, superando en 25\% el mínimo de 10\,000 registros exigido. La fragmentación horizontal por región sobre la tabla \texttt{tickets} se verificó exitosamente mediante \texttt{SHOW PARTITIONS}, confirmando las tres particiones declaradas (\texttt{p\_norte}, \texttt{p\_centro}, \texttt{p\_sur}), y mediante \texttt{SHOW RANGES} tras forzar la división física de los datos con \texttt{SPLIT AT}, obteniendo cuatro rangos físicos claramente delimitados por región, cada uno replicado en los tres nodos del clúster.
+
+\subsection{Resultados de la prueba de tolerancia a fallos}
+
+La detención del nodo \texttt{crdb-node2} no interrumpió el servicio del clúster: las operaciones de lectura (6\,004 tickets recuperados en 5.6\,ms) y escritura de prueba continuaron ejecutándose exitosamente con 2 de 3 nodos activos. El nodo detenido se reincorporó al clúster en 2.0 segundos tras su reinicio, alcanzando nuevamente el estado \texttt{is\_live=true} y recuperando la distribución completa de rangos observada previamente.
+
+\subsection{Resultados de la medición de rendimiento}
+
+De las cinco consultas evaluadas, el clúster distribuido superó en velocidad al nodo único en dos de ellas (C1: JOIN, factor 0.77x; C3: búsqueda puntual, factor 0.70x), mientras que resultó comparativamente más lento en las tres restantes (C2: GROUP BY, factor 1.15x; C4: rango, factor 1.08x; C5: subconsulta correlacionada, factor 1.15x), con diferencias de rendimiento entre 8\% y 30\% en cualquier dirección.
+
+% ============================================================
+% SECCIÓN 8: ANÁLISIS CRÍTICO
+% ============================================================
+\section{Análisis Crítico}
+\label{analisis-critico}
+
+Los resultados obtenidos permiten interpretar el comportamiento del clúster CockroachDB a la luz del fundamento teórico expuesto en la Sección~\ref{fundamento-teorico} y de los principios de fragmentación y consenso distribuido revisados.
+
+En primer lugar, la ausencia de interrupción del servicio durante la caída del Nodo 2 confirma empíricamente la garantía de disponibilidad que ofrece el algoritmo de consenso Raft mientras se mantenga el quórum mayoritario: al no ser el nodo caído el poseedor del \textit{lease} de ningún rango de la tabla principal, el sistema no incurrió en el costo adicional de una elección de líder, lo que explica el tiempo de respuesta favorable (5.6\,ms) observado incluso durante la degradación del clúster --de hecho, inferior al tiempo registrado en condiciones normales (82.82\,ms)--, diferencia atribuible más a efectos de caché de planificación de consultas en ejecuciones sucesivas que a una mejora causada por la propia caída del nodo.
+
+En segundo lugar, el patrón mixto de rendimiento observado en el benchmark comparativo --ventaja del clúster en C1 y C3, desventaja en C2, C4 y C5-- es coherente con la naturaleza del costo de coordinación distribuida descrito por Özsu y Valduriez \cite{ozsu2020principles}. Las consultas C1 y C3 se benefician de que CockroachDB puede resolver la operación mediante acceso directo al rango correspondiente (enrutamiento por clave primaria o por clave de unión indexada), permitiendo paralelización efectiva entre los tres nodos. En contraste, C2 (agregación GROUP BY) exige combinar resultados parciales de múltiples rangos potencialmente ubicados en distintos nodos, lo que introduce un costo de coordinación ausente en el nodo único; de forma similar, C5 ejecuta una subconsulta correlacionada por cada fila del resultado externo, multiplicando el número de comunicaciones internas entre nodos del clúster respecto a la ejecución local del nodo único.
+
+Es relevante notar que las diferencias de rendimiento observadas (entre 8\% y 30\%) son moderadas en comparación con lo reportado por Taft et al. para despliegues geodistribuidos de CockroachDB \cite{taft2020cockroachdb}, lo cual se explica por el hecho de que, en el presente experimento, los tres nodos operan sobre la misma máquina física mediante contenedores Docker interconectados por una red local de baja latencia, condición que no representa fielmente un escenario de producción geodistribuido donde la latencia de red entre regiones geográficas acentuaría considerablemente la brecha de rendimiento en las consultas que requieren coordinación entre rangos, de acuerdo con el modelo PACELC discutido en la Sección~\ref{fundamento-teorico} \cite{abadi2012consistency}.
+
+Finalmente, la fragmentación horizontal por región demostró ser una estrategia de diseño coherente con los patrones de acceso esperados del dominio de Soporte Técnico ISP: al colocar físicamente los tickets de cada región en particiones independientes, las consultas que filtran por región (como reportes gerenciales segmentados geográficamente) podrían beneficiarse de un escaneo restringido a un único rango, evitando la dispersión de la búsqueda entre las tres particiones -- beneficio que, sin embargo, no fue evaluado directamente en el benchmark actual, dado que ninguna de las cinco consultas definidas filtra específicamente por una única región, constituyendo una oportunidad de análisis complementario no cubierta por el alcance de esta práctica.
+
+% ============================================================
+% SECCIÓN 9: PREGUNTAS DE ANÁLISIS
+% ============================================================
+\section{Preguntas de Análisis}
+\label{preguntas-analisis}
+
+\subsection*{Pregunta 1: ¿Cómo garantiza CockroachDB la consistencia cuando un nodo falla, con referencia a quórum, líder y log de transacciones replicado?}
+
+CockroachDB implementa el algoritmo de consenso Raft a nivel de cada rango (\textit{range}) de datos, de modo que cada conjunto de tuplas replicado en tres nodos posee un líder responsable de coordinar todas las escrituras dirigidas a ese rango \cite{ongaro2014raft}. Cuando el cliente ejecuta una operación de escritura, esta se dirige al líder del rango correspondiente, quien la registra como una nueva entrada en su log local y la replica de forma paralela hacia los nodos seguidores mediante mensajes \texttt{AppendEntries} \cite{ongaro2014raft}. Una entrada de log se considera comprometida (\textit{committed}) únicamente cuando ha sido confirmada por la mayoría de los nodos que poseen una réplica de ese rango; en un clúster de tres nodos, esto equivale a que el líder y al menos un seguidor confirmen la escritura, es decir, dos de tres nodos \cite{ongaro2014raft}.
+
+Esta exigencia de mayoría (quórum) es precisamente el mecanismo que garantiza la consistencia ante la caída de un nodo: si el nodo caído era un seguidor, como ocurrió en el experimento realizado sobre la tabla \texttt{tickets} del PFC de Soporte Técnico ISP al detener \texttt{crdb-node2}, el líder puede continuar comprometiendo escrituras contando únicamente con la confirmación del seguidor restante, sin necesidad de esperar al nodo caído ni de iniciar un proceso de elección \cite{taft2020cockroachdb}. El experimento confirmó esta garantía: tras detener el nodo, tanto la lectura (\texttt{SELECT COUNT(*) FROM tickets}, que reportó 6\,004 registros en 5.6\,ms) como una escritura de prueba se ejecutaron exitosamente, demostrando que el sistema mantuvo el servicio con normalidad mientras conservó el quórum de dos de tres nodos.
+
+Si, en cambio, el nodo caído hubiese sido el líder de algún rango, los seguidores restantes habrían detectado la ausencia de \textit{heartbeats} tras un intervalo de tiempo determinado (\textit{election timeout}) e iniciado un proceso de elección mediante mensajes \texttt{RequestVote}, postulándose como candidatos hasta que uno de ellos obtuviera la mayoría de votos y asumiera el nuevo liderazgo del rango \cite{ongaro2014raft}. En ambos escenarios, la consistencia se preserva porque ninguna escritura se considera definitiva hasta ser replicada en la mayoría de los nodos, garantizando que, incluso ante la pérdida de una minoría de réplicas, el estado del sistema permanezca coherente y no se pierda ninguna transacción previamente confirmada al cliente.
+
+\subsection*{Pregunta 2: Compare el modelo de consistencia serializable de CockroachDB con el modelo de consistencia eventual de Cassandra. ¿Cuál elegiría para el PFC seleccionado, en términos de PACELC?}
+
+CockroachDB implementa un nivel de aislamiento serializable mediante un protocolo de concurrencia optimista combinado con relojes híbridos, garantizando que el resultado de transacciones concurrentes sea equivalente al de alguna ejecución serial de las mismas, incluso operando de forma distribuida \cite{taft2020cockroachdb}. Este nivel de consistencia representa la garantía más fuerte posible en un sistema transaccional, a costa de mayor latencia y de posibles reintentos de transacciones en caso de conflicto de escritura. En el modelo PACELC, CockroachDB se ubica en la categoría PC/EC: durante una partición de red prioriza consistencia sobre disponibilidad, y en operación normal prioriza consistencia sobre baja latencia \cite{abadi2012consistency}.
+
+Apache Cassandra, en contraste, adopta por diseño un modelo de consistencia eventual ajustable, en el cual las escrituras se confirman al cliente sin requerir que todas las réplicas hayan sido actualizadas de inmediato, permitiendo que las réplicas converjan a un estado consistente en un intervalo de tiempo posterior mediante mecanismos de reparación en segundo plano \cite{lakshman2010cassandra}. Cassandra permite configurar el nivel de consistencia por operación (\textit{consistency level}), lo que le otorga flexibilidad para equilibrar consistencia y disponibilidad según el caso de uso, ubicándose en la categoría PA/EL del modelo PACELC: prioriza disponibilidad y baja latencia tanto durante una partición como en operación normal \cite{lakshman2010cassandra}.
+
+Para el dominio de Soporte Técnico ISP implementado en este proyecto, la elección de CockroachDB resulta más apropiada que Cassandra. El sistema de gestión de tickets registra el historial de estados de cada solicitud de soporte (tabla \texttt{historial\_estados}) y el estado actual del ticket (columna \texttt{estado} en la tabla \texttt{tickets}); si dos técnicos de soporte modificaran simultáneamente el mismo ticket bajo un modelo de consistencia eventual, podría producirse una condición de carrera donde el estado final del ticket dependa del orden de propagación de las réplicas, en lugar de reflejar de manera determinística la última actualización válida. La garantía de serializabilidad de CockroachDB evita este escenario, justificando la aceptación de una latencia moderadamente mayor (evidenciada en el benchmark comparativo de la Sección~\ref{procedimiento-consultas}) a cambio de la integridad transaccional que exige un sistema de atención al cliente.
+
+\subsection*{Pregunta 3: ¿Cómo implementaría fragmentación horizontal explícita con PARTITION BY RANGE o PARTITION BY LIST para la tabla principal del PFC? Diseñe y justifique la estrategia.}
+
+Para la tabla principal \texttt{tickets} del dominio de Soporte Técnico ISP, se diseñó e implementó una estrategia de fragmentación horizontal mediante \texttt{PARTITION BY LIST}, utilizando el atributo \texttt{region} como clave de partición, con tres valores discretos correspondientes a las zonas operativas del proveedor de servicios: Norte, Centro y Sur \cite{ozsu2020principles}. La elección de \texttt{PARTITION BY LIST} sobre \texttt{PARTITION BY RANGE} se justifica porque la región es un atributo categórico con un conjunto finito y conocido de valores discretos, sin una relación de orden natural entre ellos que justificara una partición por rangos continuos; \texttt{PARTITION BY LIST} permite mapear explícitamente cada valor categórico a su partición correspondiente, mientras que \texttt{PARTITION BY RANGE} resulta más adecuado para atributos con orden natural, como fechas o valores numéricos continuos \cite{ozsu2020principles}.
+
+La implementación requirió que el atributo de partición formara parte de la clave primaria de la tabla, por lo cual se definió \texttt{tickets} con clave primaria compuesta \texttt{(region, ticket\_id)} en lugar de utilizar únicamente un identificador \texttt{UUID} simple, decisión de diseño tomada durante la fase de creación del esquema para habilitar la fragmentación desde el origen. La sentencia aplicada fue:
+\begin{lstlisting}[style=sqlstyle]
+ALTER TABLE tickets PARTITION BY LIST (region) (
+    PARTITION p_norte VALUES IN ('Norte'),
+    PARTITION p_centro VALUES IN ('Centro'),
+    PARTITION p_sur VALUES IN ('Sur')
+);
+\end{lstlisting}
+Esta estrategia se justifica operativamente porque los patrones de acceso más frecuentes del dominio de soporte técnico -- asignación de tickets a cuadrillas técnicas regionales, generación de reportes gerenciales segmentados por zona geográfica, y monitoreo de carga operativa por región -- filtran predominantemente por el atributo \texttt{region}, por lo que colocar físicamente los datos de cada región en particiones independientes permite que dichas consultas se resuelvan mediante un escaneo restringido a una única partición, en lugar de dispersarse innecesariamente entre las tres.
+
+\subsection*{Pregunta 4: Si el PFC requiere transacciones multi-tabla en diferentes nodos, ¿cómo garantiza CockroachDB la atomicidad? Explique el protocolo de commit interno con referencia a Raft.}
+
+CockroachDB garantiza la atomicidad de transacciones que abarcan múltiples tablas y, potencialmente, múltiples rangos distribuidos en distintos nodos, mediante un protocolo de \textit{commit} interno construido sobre el consenso Raft de cada rango individual, en lugar de depender de un protocolo de compromiso en dos fases (2PC) tradicional coordinado externamente \cite{taft2020cockroachdb}. Cuando una transacción del dominio de Soporte Técnico ISP modifica simultáneamente la tabla \texttt{tickets} (por ejemplo, actualizando el campo \texttt{estado}) y la tabla \texttt{historial\_estados} (insertando el registro de auditoría correspondiente), CockroachDB designa uno de los rangos involucrados como coordinador de la transacción (\textit{transaction record}), el cual registra el estado de la transacción (\textit{pending}, \textit{committed} o \textit{aborted}) \cite{taft2020cockroachdb}.
+
+Cada escritura individual de la transacción se propone como una entrada de log en el rango correspondiente y debe ser replicada y comprometida mediante Raft en ese rango específico antes de considerarse provisionalmente aplicada; solo cuando todas las escrituras involucradas han sido comprometidas exitosamente en sus respectivos rangos, el registro de transacción se actualiza a estado \textit{committed}, momento en el cual la transacción completa se considera atómicamente aplicada \cite{taft2020cockroachdb}. Si cualquiera de las escrituras individuales fallara -- por ejemplo, debido a un conflicto de concurrencia detectado por el protocolo de bloqueo optimista, o por la imposibilidad de alcanzar el quórum Raft en algún rango involucrado -- la transacción completa se marca como \textit{aborted} y todas las escrituras parciales ya aplicadas se revierten, garantizando que nunca quede un estado intermedio visible para otros clientes.
+
+Esta arquitectura, al apoyarse en el consenso Raft de cada rango individual en lugar de un coordinador externo centralizado, evita el principal punto débil del protocolo 2PC clásico: la vulnerabilidad ante la caída del coordinador tras la fase de votación, que puede dejar a los participantes bloqueados indefinidamente \cite{ozsu2020principles}. En CockroachDB, si el nodo que actúa como coordinador de la transacción falla, el propio mecanismo de Raft del rango que contiene el registro de transacción permite que un nuevo líder asuma el rol y continúe resolviendo el estado pendiente, evitando el bloqueo indefinido característico de 2PC ante fallos del coordinador.
+
+% ============================================================
+% SECCIÓN 10: CONCLUSIONES
+% ============================================================
+\section{Conclusiones}
+\label{conclusiones}
+
+\subsection{Conclusión Grupal}
+
+El desarrollo de la presente práctica experimental permitió implementar y verificar de manera integral un clúster de base de datos distribuida CockroachDB de tres nodos, aplicado al dominio de gestión de tickets de Soporte Técnico ISP (equipo ACC), demostrando experimentalmente los conceptos fundamentales de fragmentación horizontal, replicación y consenso distribuido estudiados en la Unidad 3 de la asignatura. La implementación de la fragmentación por región mediante \texttt{PARTITION BY LIST}, validada tanto a nivel lógico (\texttt{SHOW PARTITIONS}) como físico (\texttt{SHOW RANGES} tras forzar la división de rangos), confirmó que el diseño de fragmentación propuesto en la Semana 10 resultaba técnicamente viable y coherente con los patrones de acceso del dominio.
+
+La prueba de tolerancia a fallos constituyó la evidencia más contundente del proyecto: la detención deliberada de un nodo del clúster no interrumpió el servicio, confirmando en la práctica la garantía teórica del algoritmo de consenso Raft de mantener disponibilidad y consistencia mientras se conserve el quórum mayoritario. Asimismo, la medición comparativa de rendimiento entre el clúster distribuido y una instancia de nodo único reveló un patrón mixto -- ventaja del clúster en consultas de acceso directo por clave, desventaja en operaciones que requieren coordinación entre rangos --, resultado que enriqueció la comprensión del equipo sobre los costos y beneficios inherentes a la distribución de datos, más allá de una expectativa simplista de que ``distribuido siempre es más rápido''.
+
+Finalmente, el proceso reveló también un aprendizaje no anticipado en el diseño original de la práctica: la necesidad de gestionar activamente el modelo de licenciamiento de CockroachDB (transición hacia CockroachDB Software License a partir de la versión 24.3), lo cual obligó al equipo a investigar y resolver de forma autónoma un obstáculo técnico real no cubierto explícitamente por la guía de la práctica, fortaleciendo así la competencia de resolución de problemas prácticos que constituye el objetivo de aprendizaje central de esta unidad.
+
+\subsection{Conclusiones Individuales}
+
+\subsubsection*{Conclusión de Ernesto Gregory Luna Mora}
+
+Asumir la parte de infraestructura de este proyecto me obligó a entender Docker Compose más allá del uso superficial que había tenido antes. No fue simplemente escribir un archivo YAML: tuve que aprender por qué cada nodo necesita un \texttt{advertise-addr} propio, cómo funciona una red \textit{bridge} para que los contenedores se descubran entre sí por hostname, y para qué sirve realmente un \textit{healthcheck} cuando uno depende de que tres procesos independientes se levanten casi al mismo tiempo. La primera vez que intenté inicializar el clúster sin esperar a que los tres nodos estuvieran realmente sanos, el comando \texttt{cockroach init} simplemente fallaba, y ahí entendí que la infraestructura distribuida no perdona los atajos. También me tocó diseñar el esquema de la base de datos pensando ya en la fragmentación que aplicaríamos después, lo cual fue más difícil de lo que esperaba: definir la tabla \texttt{tickets} con clave primaria compuesta \texttt{(region, ticket\_id)} en vez de un simple UUID significó revisar de nuevo las llaves foráneas y ajustar \texttt{historial\_estados} para que la relación se mantuviera correcta. Esta práctica se conecta directamente con mi PFC de origen, donde el módulo de tickets manejaba la lógica de negocio de forma centralizada; ver cómo esos mismos datos se reparten físicamente entre nodos me hizo apreciar decisiones de diseño que antes daba por sentadas. Trabajar en equipo con Cristhian y Robinson, coordinando avances por Git y validando entre los tres cada paso antes de continuar, fue clave para no perder tiempo repitiendo errores de configuración.
+
+\subsubsection*{Conclusión de Cristhian Daniel Pacheco Cárdenas}
+
+Mi parte del trabajo fue la que más me hizo cuestionar mis propias expectativas. Al principio asumía, como probablemente le pasa a cualquiera que escucha hablar de bases de datos distribuidas por primera vez, que más nodos significa automáticamente más velocidad en todo. Generar los datos sintéticos con Faker en configuración regional española fue relativamente directo una vez que entendí cómo aprovechar \texttt{execute\_values} de psycopg2 para insertar por lotes en lugar de fila por fila, algo que aceleró muchísimo la carga de los 12\,500 registros. Lo verdaderamente formativo vino después, al correr el benchmark: ver que el clúster ganaba en el JOIN y en la búsqueda puntual, pero perdía en el GROUP BY, en la consulta de rango y en la subconsulta correlacionada, me obligó a entender de verdad por qué la coordinación entre nodos tiene un costo real y no es solo una frase de manual. Además, tengo que ser honesto en esta conclusión: la Consulta 3 se ejecutó contra una clave primaria que no existía en el conjunto de datos, así que el tiempo medido no refleja una recuperación completa de fila, sino más bien el costo de verificar que el registro no está. Preferimos dejarlo documentado con transparencia en vez de maquillar el resultado. Esta experiencia se conecta con mi PFC de origen, donde nunca había medido con esta rigurosidad el impacto real de las decisiones de distribución de datos sobre el rendimiento de las consultas.
+
+\subsubsection*{Conclusión de Robinson Rodrigo Cando Moreno}
+
+Había leído sobre el algoritmo Raft en teoría antes de esta práctica, pero una cosa es entenderlo en un diagrama de un artículo y otra muy distinta es detener con mis propias manos el contenedor \texttt{crdb-node2} y ver en tiempo real que el clúster seguía respondiendo lecturas y escrituras sin interrupción. Ese momento, cuando la consulta de conteo devolvió resultados en 5.6\,ms con un nodo caído, fue el que más me convenció de que el consenso distribuido no es solo un tema de examen, sino un mecanismo que realmente sostiene sistemas en producción. Diseñar el diagrama de secuencia UML de ese comportamiento fue más exigente de lo que pensé: en un primer borrador representé mal el momento en que el nodo reincorporado sincroniza su log, como si el líder tuviera que reenviar todo el historial completo en lugar de solo las entradas faltantes, y tuve que corregir esa parte para que el diagrama reflejara con precisión lo que realmente hace Raft. Encargarme también de buena parte de la redacción del informe me dejó una lección distinta: verificar que cada afirmación teórica estuviera respaldada por una referencia bibliográfica real, en vez de dar por ciertas cosas que "suenan correctas", cambió la forma en que voy a escribir trabajos académicos de aquí en adelante. Todo esto se relaciona con mi PFC de origen, donde nunca había pensado en la disponibilidad del sistema como algo que se puede demostrar experimentalmente y no solo suponer.
+
+% ============================================================
+% SECCIÓN 11: DECLARACIÓN DE USO DE IA GENERATIVA
+% ============================================================
+\section{Declaración de Uso de Inteligencia Artificial Generativa}
+\label{declaracion-ia}
+
+En cumplimiento del requisito de transparencia académica establecido en la guía de la práctica, el equipo declara el uso de la herramienta de inteligencia artificial generativa \textbf{Claude (Anthropic)} durante el desarrollo del presente trabajo, especificando a continuación el propósito y el alcance de dicha asistencia.
+
+\textbf{Herramienta utilizada:} Claude (Anthropic), modelo de lenguaje de gran escala accedido mediante la interfaz de conversación web.
+
+\textbf{Propósito del uso:}
+\begin{itemize}
+    \item Asistencia en la interpretación de los criterios de evaluación de la rúbrica y clarificación de los indicadores exigidos por cada dimensión.
+    \item Redacción y estructuración del contenido del fundamento teórico (Sección~\ref{fundamento-teorico}), a partir de las referencias bibliográficas seleccionadas por el equipo.
+    \item Diagnóstico y resolución de un problema técnico relacionado con el modelo de licenciamiento de CockroachDB (transición a CockroachDB Software License a partir de la versión 24.3), incluyendo la investigación del proceso de obtención de una licencia Enterprise Free.
+    \item Revisión de la corrección conceptual del diagrama de secuencia UML del comportamiento del algoritmo Raft (Figura~\ref{fig:raft-secuencia}), incluyendo la identificación y corrección de un error en la representación del mensaje de reincorporación del nodo.
+    \item Redacción asistida de las secciones de Procedimiento Aplicado, Resultados, Análisis Crítico y Preguntas de Análisis, a partir de los datos, capturas y resultados de ejecución reales generados por el equipo.
+    \item Revisión y corrección de fragmentos de código Python y SQL desarrollados por el equipo (\texttt{seed\_data.py}, \texttt{docker-compose.yml}, \texttt{02\_partitions.sql}), identificando un manejo de errores que ocultaba silenciosamente el fallo de aplicación de particiones.
+    \item Verificación de referencias bibliográficas adicionales (Cassandra, MongoDB) mediante búsqueda web, para completar la cobertura temática del fundamento teórico.
+\end{itemize}
+
+\textbf{Secciones asistidas:} Fundamento Teórico (Sección~\ref{fundamento-teorico}), Procedimiento Aplicado (Sección~\ref{procedimiento}), Resultados (Sección~\ref{resultados}), Análisis Crítico (Sección~\ref{analisis-critico}), Preguntas de Análisis (Sección~\ref{preguntas-analisis}) y la presente declaración.
+
+\textbf{Secciones no asistidas por IA:} Los datos experimentales primarios (capturas de pantalla, resultados de ejecución de scripts, mediciones de tiempo, contenido del video de tolerancia a fallos) fueron generados directamente por el equipo mediante la ejecución del clúster CockroachDB en su entorno local. Las conclusiones individuales (Sección~10.2) reflejan la reflexión personal y genuina de cada integrante del equipo, redactadas sin asistencia de IA generativa.
+
+El equipo declara que ha revisado, verificado y validado críticamente todo el contenido generado con asistencia de IA antes de su inclusión en el presente documento, asumiendo la responsabilidad académica plena sobre la exactitud y originalidad del trabajo entregado.
+
+% ============================================================
+% BIBLIOGRAFÍA
+% ============================================================
+\newpage
+\printbibliography[title={Bibliografía}]
+
+\end{document}
