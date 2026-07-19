@@ -645,7 +645,18 @@ Finalmente, el proceso reveló también un aprendizaje no anticipado en el dise�
 
 \subsubsection*{Conclusión de Ernesto Gregory Luna Mora}
 
-Asumir la parte de infraestructura de este proyecto me obligó a entender Docker Compose más allá del uso superficial que había tenido antes. No fue simplemente escribir un archivo YAML: tuve que aprender por qué cada nodo necesita un \texttt{advertise-addr} propio, cómo funciona una red \textit{bridge} para que los contenedores se descubran entre sí por hostname, y para qué sirve realmente un \textit{healthcheck} cuando uno depende de que tres procesos independientes se levanten casi al mismo tiempo. La primera vez que intenté inicializar el clúster sin esperar a que los tres nodos estuvieran realmente sanos, el comando \texttt{cockroach init} simplemente fallaba, y ahí entendí que la infraestructura distribuida no perdona los atajos. También me tocó diseñar el esquema de la base de datos pensando ya en la fragmentación que aplicaríamos después, lo cual fue más difícil de lo que esperaba: definir la tabla \texttt{tickets} con clave primaria compuesta \texttt{(region, ticket\_id)} en vez de un simple UUID significó revisar de nuevo las llaves foráneas y ajustar \texttt{historial\_estados} para que la relación se mantuviera correcta. Esta práctica se conecta directamente con mi PFC de origen, donde el módulo de tickets manejaba la lógica de negocio de forma centralizada; ver cómo esos mismos datos se reparten físicamente entre nodos me hizo apreciar decisiones de diseño que antes daba por sentadas. Trabajar en equipo con Cristhian y Robinson, coordinando avances por Git y validando entre los tres cada paso antes de continuar, fue clave para no perder tiempo repitiendo errores de configuración.
+  Por otro lado, el análisis del benchmark comparativo me permitió contrastar la teoría de sistemas distribuidos
+  con el comportamiento real del motor tras definir la clave compuesta \texttt{(region, ticket\_id)} en la tabla
+  \texttt{tickets}. Al evaluar los tiempos de respuesta en el clúster frente al nodo único, comprobamos de manera
+  práctica cómo el protocolo de consenso Raft y la latencia de red en una red \textit{bridge} penalizan el
+  rendimiento de las consultas transaccionales más simples. No obstante, esta sobrecarga se justifica plenamente al
+  observar la tolerancia a fallos en producción: al simular la pérdida de un nodo, el clúster mantuvo la consistencia
+  de los datos en \texttt{historial\_estados} y continuó atendiendo peticiones sin interrupciones. Esto valida que la
+  correcta configuración de directivas como \texttt{advertise-addr} y los mecanismos de \texttt{healthcheck} son
+  indispensables para automatizar la recuperación del clúster durante el proceso de \texttt{cockroach init} y la
+  posterior reincorporación de nodos caídos, demostrando que la pérdida marginal de velocidad es un intercambio
+  necesario para alcanzar una alta disponibilidad real.
+
 
 \subsubsection*{Conclusión de Cristhian Daniel Pacheco Cárdenas}
 
